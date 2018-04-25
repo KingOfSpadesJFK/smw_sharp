@@ -39,7 +39,7 @@ namespace MarioWorldSharp
         const int ResHeight = 224;
         const float ResHeightF = 224F;
         ColorDisplacement colorDisp;
-        const bool drawCollision = true;
+        const bool drawCollision = false;
 
         public Game1()
         {
