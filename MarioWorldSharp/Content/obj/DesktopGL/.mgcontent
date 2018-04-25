@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SourceFileCollection xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Profile>Reach</Profile>
+  <Platform>DesktopGL</Platform>
+  <Config />
+  <SourceFiles>
+    <File>C:/Users/Miguel Lima/source/repos/MarioWorldSharp/MarioWorldSharp/Content/assets/image/player/small/idle.png</File>
+    <File>C:/Users/Miguel Lima/source/repos/MarioWorldSharp/MarioWorldSharp/Content/assets/image/player/small/run.png</File>
+    <File>C:/Users/Miguel Lima/source/repos/MarioWorldSharp/MarioWorldSharp/Content/assets/font/debug.spritefont</File>
+    <File>C:/Users/Miguel Lima/source/repos/MarioWorldSharp/MarioWorldSharp/Content/assets/image/map16/grass1.png</File>
+    <File>C:/Users/Miguel Lima/source/repos/MarioWorldSharp/MarioWorldSharp/Content/assets/image/map16/grass2.png</File>
+    <File>C:/Users/Miguel Lima/source/repos/MarioWorldSharp/MarioWorldSharp/Content/assets/image/player/small/backward.png</File>
+    <File>C:/Users/Miguel Lima/source/repos/MarioWorldSharp/MarioWorldSharp/Content/assets/image/player/small/duck.png</File>
+    <File>C:/Users/Miguel Lima/source/repos/MarioWorldSharp/MarioWorldSharp/Content/assets/image/player/small/fall.png</File>
+    <File>C:/Users/Miguel Lima/source/repos/MarioWorldSharp/MarioWorldSharp/Content/assets/image/player/small/fastjump.png</File>
+    <File>C:/Users/Miguel Lima/source/repos/MarioWorldSharp/MarioWorldSharp/Content/assets/image/player/small/fastrun1.png</File>
+    <File>C:/Users/Miguel Lima/source/repos/MarioWorldSharp/MarioWorldSharp/Content/assets/image/player/small/fastrun2.png</File>
+    <File>C:/Users/Miguel Lima/source/repos/MarioWorldSharp/MarioWorldSharp/Content/assets/image/player/small/forward.png</File>
+    <File>C:/Users/Miguel Lima/source/repos/MarioWorldSharp/MarioWorldSharp/Content/assets/image/player/small/jump.png</File>
+    <File>C:/Users/Miguel Lima/source/repos/MarioWorldSharp/MarioWorldSharp/Content/assets/image/player/small/lookup.png</File>
+    <File>C:/Users/Miguel Lima/source/repos/MarioWorldSharp/MarioWorldSharp/Content/assets/image/player/small/skid.png</File>
+  </SourceFiles>
+</SourceFileCollection>
