@@ -25,7 +25,7 @@ namespace MarioWorldSharp.block
             Mario.SetY(Mario.GetY() + 16.0 - (Mario.GetY() % 16.0));
         }
 
-        public override void Above(Sprite sprite, double x, double y)
+        public override void Above(ISprite sprite, double x, double y)
         {
         }
 
@@ -40,7 +40,7 @@ namespace MarioWorldSharp.block
             Mario.SetY(Mario.GetY() - (Mario.GetY() % 16.0));
         }
 
-        public override void Bellow(Sprite sprite, double x, double y)
+        public override void Bellow(ISprite sprite, double x, double y)
         {
         }
 
@@ -55,7 +55,7 @@ namespace MarioWorldSharp.block
             Mario.SetX(Mario.GetX() + 16.0 - (Mario.GetX() % 16.0));
         }
 
-        public override void Left(Sprite sprite, double x, double y)
+        public override void Left(ISprite sprite, double x, double y)
         {
         }
 
@@ -70,7 +70,7 @@ namespace MarioWorldSharp.block
             Mario.SetX(Mario.GetX() - (Mario.GetX() % 16.0));
         }
 
-        public override void Right(Sprite sprite, double x, double y)
+        public override void Right(ISprite sprite, double x, double y)
         {
         }
 
@@ -78,7 +78,7 @@ namespace MarioWorldSharp.block
         {
         }
 
-        public override void BodyInside(Sprite sprite, double x, double y)
+        public override void BodyInside(ISprite sprite, double x, double y)
         {
         }
 
@@ -98,7 +98,7 @@ namespace MarioWorldSharp.block
         {
         }
 
-        public override void TopCorner(Sprite sprite, double x, double y)
+        public override void TopCorner(ISprite sprite, double x, double y)
         {
         }
 
@@ -139,7 +139,7 @@ namespace MarioWorldSharp.block
         {
         }
 
-        public override void Above(Sprite sprite, double x, double y)
+        public override void Above(ISprite sprite, double x, double y)
         {
         }
 
@@ -147,7 +147,7 @@ namespace MarioWorldSharp.block
         {
         }
 
-        public override void Bellow(Sprite sprite, double x, double y)
+        public override void Bellow(ISprite sprite, double x, double y)
         {
         }
 
@@ -155,7 +155,7 @@ namespace MarioWorldSharp.block
         {
         }
 
-        public override void Left(Sprite sprite, double x, double y)
+        public override void Left(ISprite sprite, double x, double y)
         {
         }
 
@@ -163,7 +163,7 @@ namespace MarioWorldSharp.block
         {
         }
 
-        public override void Right(Sprite sprite, double x, double y)
+        public override void Right(ISprite sprite, double x, double y)
         {
         }
 
@@ -171,7 +171,7 @@ namespace MarioWorldSharp.block
         {
         }
 
-        public override void BodyInside(Sprite sprite, double x, double y)
+        public override void BodyInside(ISprite sprite, double x, double y)
         {
         }
 
@@ -191,7 +191,7 @@ namespace MarioWorldSharp.block
         {
         }
 
-        public override void TopCorner(Sprite sprite, double x, double y)
+        public override void TopCorner(ISprite sprite, double x, double y)
         {
         }
 

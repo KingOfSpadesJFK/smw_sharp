@@ -29,7 +29,7 @@ namespace MarioWorldSharp
         LevelEndPower = 12
     }
 
-    public interface Sprite
+    public interface ISprite
     {
         void Process();
         void UpdateXPosition();
@@ -44,7 +44,7 @@ namespace MarioWorldSharp
         bool[] GetBlockedStatus();
     }
 
-    public abstract class BlankSprite : IDisposable, Sprite
+    public abstract class BlankSprite : IDisposable, ISprite
     {
         private SpriteStatus stat;
         private double xPos;
