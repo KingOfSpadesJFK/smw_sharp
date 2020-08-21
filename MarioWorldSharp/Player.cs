@@ -3,16 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Drawing;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGame;
-using MonoGame.Utilities;
 
 namespace MarioWorldSharp
 {
-    public enum Powerup
+    public enum PowerupEnum
     {
         Small = 0,
         Mushroom = 1,
@@ -22,29 +20,47 @@ namespace MarioWorldSharp
 
     public class Player
     {
-        public double xPos { get; set; }
-        public double yPos { get; set; }
-        public double xSpeed { get; set; }
-        public double ySpeed { get; set; }
-        public double xAccel { get; set; }
-        public double yAccel { get; set; }
-        public byte vGravity { get; set; }
-        public byte hGravity { get; set; }
-        public bool blockedBellow { get; set; }
-        public bool blockedAbove { get; set; }
-        public bool blockedLeft { get; set; }
-        public bool blockedRight { get; set; }
-        public Powerup power { get; set; }
+        private double _xPos;
+        private double _yPos;
+        public double XPosition
+        {
+            get => _xPos;
+            set
+            {
+                _xPos = value;
+                if (collisionBox != null)
+                    collisionBox.X = (int)value;
+            }
+        }
+        public double YPosition
+        {
+            get => _yPos;
+            set
+            {
+                _yPos = value;
+                if (collisionBox != null)
+                    collisionBox.Y = (int)value + colDisp;
+            }
+        }
+        public double XSpeed { get; set; }
+        public double YSpeed { get; set; }
+        public byte VertGravity { get; set; }
+        public byte HorizGravity { get; set; }
+        public bool BlockedBellow { get; set; }
+        public bool BlockedAbove { get; set; }
+        public bool BlockedLeft { get; set; }
+        public bool BlockedRight { get; set; }
+        public PowerupEnum Powerup { get; set; }
+        public Texture2D[] Poses { get; set; }
+        public int Pose { get; set; }
+        public int YDrawDisplacement { get; set; }
+        public byte DashTimer { get; set; }
+
         private Rectangle collisionBox;
         private bool facingRight;
         private byte animationTimer;
-        public Texture2D[] Poses { get; set; }
-        public int Pose { get; set; }
-
         private int colDisp;
-        public int yDrawDisp { get; set; }
         private bool jumped;
-        public byte dashTimer { get; set; }
         private bool dashJumped;
         private bool spinJumped;
         private bool flip;
@@ -52,66 +68,42 @@ namespace MarioWorldSharp
         private bool debugged;
         private bool ducking;
 
-        public Player()
+        public Player() : this(0, 0)
+        {}
+
+        public Player(double XPosition, double YPosition)
         {
             facingRight = true;
-            xPos = 0;
-            yPos = 0;
-            vGravity = 1;
-            hGravity = 0;
-            if (!power.Equals(Powerup.Small))
+            VertGravity = 1;
+            HorizGravity = 0;
+            if (!Powerup.Equals(PowerupEnum.Small))
             {
-                collisionBox = new Rectangle((int)xPos, (int)yPos, 16, 32);
                 colDisp = 0;
-                yDrawDisp = 0;
+                YDrawDisplacement = 0;
+                collisionBox = new Rectangle(0, 0, 16, 32);
             }
             else
             {
-                yDrawDisp = 10;
+                YDrawDisplacement = 10;
                 colDisp = 16;
-                collisionBox = new Rectangle((int)xPos, (int)yPos + colDisp, 16, 16);
+                collisionBox = new Rectangle(0, 0, 16, 16);
             }
-            dashTimer = 0;
+            DashTimer = 0;
             Pose = 0;
 
+            this.XPosition = XPosition;
+            this.YPosition = YPosition;
             Console.Write("It's a me!");
             Poses = new Texture2D[70];
+
+            //Input Events
+            MarioWorld.InputEvent.JumpPressEvent += Jump;
+            MarioWorld.InputEvent.SpinPressEvent += Spinjump;
+            MarioWorld.InputEvent.JumpDownEvent += Jumping;
+            MarioWorld.InputEvent.SpinDownEvent += Jumping;
         }
 
-        public Player(double xPos, double yPos)
-        {
-            facingRight = true;
-            this.xPos = xPos;
-            this.yPos = yPos;
-            vGravity = 1;
-            hGravity = 0;
-            collisionBox = new Rectangle((int)xPos, (int)yPos, 16, 16);
-            Console.Write("It's a me!");
-        }
-
-        public double GetX() { return xPos; }
-        public double GetY() { return yPos; }
-        public double GetXSpeed() { return xSpeed; }
-        public double GetYSpeed() { return ySpeed; }
-        public double GetXAccel() { return xAccel; }
-        public double GetYAccel() { return yAccel; }
         public Rectangle GetCollisionBox() { return collisionBox; }
-        public bool GetBlockedAbove() { return blockedAbove; }
-        public bool GetBlockedBellow() { return blockedBellow; }
-        public bool GetBlockedLeft() { return blockedLeft; }
-        public bool GetBlockedRight() { return blockedRight; }
-        public bool IsFacingRight() { return facingRight; }
-
-        public void SetX(double newX) { xPos = newX; }
-        public void SetY(double newY) { yPos = newY; }
-        public void SetXSpeed(double newX) { xSpeed = newX; }
-        public void SetYSpeed(double newY) { ySpeed = newY; }
-        public void SetXAccel(double newX) { xAccel = newX; }
-        public void SetYAccel(double newY) { yAccel = newY; }
-        public void SetBlockedAbove(bool b) { blockedAbove = b; }
-        public void SetBlockedBellow(bool b) { blockedBellow = b; }
-        public void SetBlockedLeft(bool b) { blockedLeft = b; }
-        public void SetBlockedRight(bool b) { blockedRight = b; }
 
         public void Process()
         {
@@ -138,20 +130,20 @@ namespace MarioWorldSharp
                 if (keyState.IsKeyDown(Keys.A))
                     move = 6.0;
                 if (keyState.IsKeyDown(Keys.Left))
-                    xPos -= move;
+                    XPosition -= move;
                 if (keyState.IsKeyDown(Keys.Right))
-                    xPos += move;
+                    XPosition += move;
                 if (keyState.IsKeyDown(Keys.Up))
-                    yPos -= move;
+                    YPosition -= move;
                 if (keyState.IsKeyDown(Keys.Down))
-                    yPos += move;
+                    YPosition += move;
             }
             else
             {
                 Move();
-                UpdateXPosition();
-                UpdateYPosition();
                 EnvironmentCollision();
+                UpdateXPositionition();
+                UpdateYPositionition();
             }
         }
 
@@ -168,98 +160,118 @@ namespace MarioWorldSharp
             return Poses[Pose];
         }
 
+
+        public static readonly int VertColisionOffset = 5;
+        public static readonly int HorizCollisionOffset = 3;
         private void EnvironmentCollision()
         {
-            collisionBox.X = (int)xPos;
-            collisionBox.Y = (int)yPos + colDisp;
+            BlockedAbove = false;
+            BlockedBellow = false;
+            BlockedLeft = false;
+            BlockedRight = false;
 
-            Level level = new Level();
-            blockedAbove = false;
-            blockedBellow = false;
-            blockedLeft = false;
-            blockedRight = false;
+            //Check left collision
+            MarioWorld.level.GetMap16FromPosition(collisionBox.Left + HorizCollisionOffset, collisionBox.Top + collisionBox.Height / 2).Left(this, collisionBox.Left + HorizCollisionOffset, collisionBox.Top + collisionBox.Height / 2);
 
-            using (Block map16 = level.GetMap16(collisionBox.X + 2 / 16, collisionBox.Bottom / 16))
-            {
-                map16.Bellow(this, collisionBox.X+2, collisionBox.Bottom);
-            }
-            if (!blockedBellow)
-            {
-                using (Block map16 = level.GetMap16(collisionBox.Right-2 / 16, collisionBox.Bottom / 16))
-                {
-                    map16.Bellow(this, collisionBox.Right-2, collisionBox.Bottom);
-                }
-            }
+            //Check right collision
+            MarioWorld.level.GetMap16FromPosition(collisionBox.Right - HorizCollisionOffset, collisionBox.Top + collisionBox.Height / 2).Right(this, collisionBox.Right - HorizCollisionOffset, collisionBox.Top + collisionBox.Height / 2);
 
-            using (Block map16 = level.GetMap16(collisionBox.X+2 / 16, collisionBox.Y / 16))
-            {
-                map16.Above(this, collisionBox.X+2, collisionBox.Y);
-            }
-            if (!blockedBellow)
-            {
-                using (Block map16 = level.GetMap16(collisionBox.Right-2 / 16, collisionBox.Y / 16))
-                {
-                    map16.Above(this, collisionBox.Right-2, collisionBox.Y);
-                }
-            }
+            //Check bottom collision
+            MarioWorld.level.GetMap16FromPosition(collisionBox.Left + VertColisionOffset, collisionBox.Bottom).Bellow(this, collisionBox.Left + VertColisionOffset, collisionBox.Bottom);
+            MarioWorld.level.GetMap16FromPosition(collisionBox.Right - VertColisionOffset, collisionBox.Bottom).Bellow(this, collisionBox.Right - VertColisionOffset, collisionBox.Bottom);
 
-            //level.GetMap16(collisionBox.X / 16, collisionBox.Y + (collisionBox.Height/2) / 16).Left(this, collisionBox.X, collisionBox.Y + (collisionBox.Height / 2));
-            //if (!blockedLeft)
-            //    level.GetMap16(collisionBox.Right / 16, collisionBox.Y + (collisionBox.Height / 2) / 16).Right(this, collisionBox.Right, collisionBox.Y + (collisionBox.Height / 2));
-
-            collisionBox.X = (int)xPos;
-            collisionBox.Y = (int)yPos + colDisp;
+            //Check top collision
+            MarioWorld.level.GetMap16FromPosition(collisionBox.Left + VertColisionOffset, collisionBox.Top).Above(this, collisionBox.Left + VertColisionOffset, collisionBox.Top);
+            MarioWorld.level.GetMap16FromPosition(collisionBox.Right - VertColisionOffset, collisionBox.Top).Above(this, collisionBox.Right - VertColisionOffset, collisionBox.Top);
         }
 
-        private void UpdateXPosition()
+        private void UpdateXPositionition()
         {
-            bool neg = xAccel < 0;
-            xSpeed += xAccel;
-            xPos += xSpeed;
+            XPosition += XSpeed;
         }
 
-        private void UpdateYPosition()
+        private void UpdateYPositionition()
         {
-            var keySate = Keyboard.GetState();
-            double gravity = vGravity * .375;
-            if (keySate.IsKeyDown(Keys.Z) || keySate.IsKeyDown(Keys.X))
-                gravity = vGravity * 0.1875;
-            if (ySpeed + yAccel < 64.0 / 16.0)
-                ySpeed += (yAccel + gravity);
-            yPos += ySpeed;
+            double gravity = VertGravity * .375;
+            if (Input.Jump.IsKeyHeld() || Input.Spinjump.IsKeyHeld())
+                gravity = VertGravity * 0.1875;
+            if (YSpeed < 64.0 / 16.0)
+                YSpeed += gravity;
+            YPosition += YSpeed;
+        }
+
+        private void Jump(object sender, EventArgs e)
+        {
+            if (!jumped && BlockedBellow)
+            {
+                YSpeed = (-80.0 - ((640.0 * Math.Abs(XSpeed * 2.0)) / 256.0)) / 16.0;
+            }
+        }
+
+        private void Jumping(object sender, EventArgs e)
+        {
+            if (animationTimer == 0 && YSpeed <= 0 && !BlockedBellow)
+            {
+                if (dashJumped)
+                    Pose = 0x0C;
+                else
+                    Pose = 0x0B;
+            }
+            if (!jumped && BlockedBellow)
+            {
+                jumped = true;
+                if (DashTimer >= 112)
+                    dashJumped = true;
+            }
+        }
+
+        private void Spinjump(object sender, EventArgs e)
+        {
+            if (!jumped && BlockedBellow)
+            {
+                spinJumped = true;
+                YSpeed = (-74.0 - ((592.0 * Math.Abs(XSpeed * 2.0)) / 256.0)) / 16.0;
+            }
         }
 
         private void Move()
         {
             double acceleration = 0.09375;
             double decceleration = .3125;
-            //0.0078125
+            //SMW velocity to double: v / 16.0
             double maxXSpeed = 20.0 / 16.0;
-            var keySate = Keyboard.GetState();  //Lol misspelled state
-            if (keySate.IsKeyDown(Keys.A))
+
+            if (BlockedBellow && Input.Down.IsKeyHeld())
+                ducking = true;
+            else if (BlockedBellow)
+                ducking = false;
+
+            bool moving = (Input.Left.IsKeyHeld() || Input.Right.IsKeyHeld()) && !ducking;
+
+            if (Input.Dash.IsKeyHeld())
             {
                 decceleration = .3125;
                 acceleration = 0.09375;
-                if (dashTimer >= 112)
+                if (DashTimer >= 112)
                     maxXSpeed = 48.0 / 16.0;
                 else
                     maxXSpeed = 36.0 / 16.0;
             }
 
-            if (blockedBellow && xSpeed != 0)
+            if (BlockedBellow && (moving || XSpeed != 0))
             {
                 if (animationTimer == 0)
                 {
                     Pose++;
-                    if (dashTimer == 112)
+                    if (DashTimer == 112)
                         Pose = (Pose % 2) + 4;
                     else
                         Pose %= 2;
-                    if (Math.Abs(xSpeed) >= 48.0 / 16.0)
+                    if (Math.Abs(XSpeed) >= 48.0 / 16.0)
                         animationTimer = 2;
-                    else if (Math.Abs(xSpeed) >= 36.0 / 16.0)
+                    else if (Math.Abs(XSpeed) >= 36.0 / 16.0)
                         animationTimer = 3;
-                    else if (Math.Abs(xSpeed) >= 20.0 / 16.0)
+                    else if (Math.Abs(XSpeed) >= 20.0 / 16.0)
                         animationTimer = 6;
                     else
                         animationTimer = 10;
@@ -267,80 +279,43 @@ namespace MarioWorldSharp
             }
             else
             {
-                if (blockedBellow)
+                if (BlockedBellow)
                     Pose = 0;
             }
 
             if (animationTimer > 0)
                 animationTimer--;
             
-            if (blockedBellow && keySate.IsKeyDown(Keys.A) && (keySate.IsKeyDown(Keys.Left) || keySate.IsKeyDown(Keys.Right)))
+            if (BlockedBellow && moving && Input.Dash.IsKeyHeld())
             {
-                if (!facingRight)
+                if (Math.Abs(XSpeed) >= 36.0 / 16.0)
                 {
-                    if (xSpeed <= -20.0 / 16.0)
-                    {
-                        if (dashTimer < 112)
-                            dashTimer += 2;
-                        else
-                            dashTimer = 112;
-                    }
+                    if (DashTimer < 112)
+                        DashTimer += 2;
                     else
-                        if (dashTimer > 0)
-                        dashTimer--;
+                        DashTimer = 112;
                 }
                 else
-                {
-                    if (xSpeed >= 20.0 / 16.0)
-                    {
-                        if (dashTimer < 112)
-                            dashTimer += 2;
-                        else
-                            dashTimer = 112;
-                    }
-                    else
-                        if (dashTimer > 0)
-                        dashTimer--;
-                }
+                    if (DashTimer > 0)
+                    DashTimer--;
             }
             else
             {
-                if (!blockedBellow && keySate.IsKeyDown(Keys.A) && dashTimer == 112)
+                if (!BlockedBellow && Input.Dash.IsKeyHeld() && DashTimer >= 112)
                 {
-                    if (Math.Abs(xSpeed) < 48.0 / 16.0)
-                        dashTimer--;
+                    if (Math.Abs(XSpeed) < 48.0 / 16.0)
+                        DashTimer--;
                 }
-                else if (dashTimer > 0)
-                    dashTimer--;
+                else if (DashTimer > 0)
+                    DashTimer--;
             }
 
-            if (!dashJumped && dashTimer < 112 && animationTimer == 0 && !blockedBellow && (ySpeed > 0 || (ySpeed < 0 && !jumped)))
+            if (!dashJumped && DashTimer < 112 && animationTimer == 0 && !BlockedBellow && (YSpeed > 0 || (YSpeed < 0 && !jumped)))
                 Pose = 0x24;
 
-            if (keySate.IsKeyDown(Keys.Z) || keySate.IsKeyDown(Keys.X))
+            if (!(Input.Spinjump.IsKeyHeld() || Input.Jump.IsKeyHeld()))
             {
-                if (animationTimer == 0 && ySpeed <= 0 && !blockedBellow)
-                {
-                    if (dashJumped)
-                        Pose = 0x0C;
-                    else
-                        Pose = 0x0B;
-                }
-                if (!jumped && blockedBellow)
-                {
-                    spinJumped = keySate.IsKeyDown(Keys.X);
-                    if (spinJumped)
-                        ySpeed = (-74.0 - ((592.0 * Math.Abs(xSpeed * 2.0)) / 256.0)) / 16.0;
-                    else
-                        ySpeed = (-80.0 - ((640.0 * Math.Abs(xSpeed * 2.0)) / 256.0)) / 16.0;
-                    jumped = true;
-                    if (dashTimer >= 112)
-                        dashJumped = true;
-                }
-            }
-            else
-            {
-                if (blockedBellow)
+                if (BlockedBellow)
                 {
                     if (jumped)
                         animationTimer = 0;
@@ -350,7 +325,7 @@ namespace MarioWorldSharp
                 }
             }
 
-            if (spinJumped && !blockedBellow)
+            if (spinJumped && !BlockedBellow)
             {
                 if (animationTimer == 0 || animationTimer > 7)
                     animationTimer = 7;
@@ -358,114 +333,86 @@ namespace MarioWorldSharp
                 bool[] facingRightSpinning = { false, false, true, false };
                 Pose = posePointers[(animationTimer - 1) / 2];
                 flip ^= facingRightSpinning[(animationTimer - 1) / 2];
+                ducking = false;
             }
             else
                 flip = facingRight;
 
-            if (xSpeed == 0 && blockedBellow && keySate.IsKeyDown(Keys.Up))
+            if (XSpeed == 0 && !moving && BlockedBellow && Input.Up.IsKeyHeld())
                 Pose = 0x03;
-            if (blockedBellow && keySate.IsKeyDown(Keys.Down))
-                ducking = true;
-            else if (blockedBellow)
-                ducking = false;
             if (ducking)
                 Pose = 0x3C;
 
-            bool notTwoHDir = !(keySate.IsKeyDown(Keys.Left) && keySate.IsKeyDown(Keys.Right));
+            moving = (Input.Left.IsKeyHeld() || Input.Right.IsKeyHeld()) && !ducking;
+            bool notTwoHDir = !(Input.Left.IsKeyHeld() && Input.Right.IsKeyHeld());
 
-            if ((!blockedBellow || !ducking) && notTwoHDir && keySate.IsKeyDown(Keys.Left) && xSpeed > -maxXSpeed)
+            #region Moving
+            if ((!BlockedBellow || !ducking) && notTwoHDir && Input.Left.IsKeyHeld())
             {
                 facingRight = false;
-                if (xSpeed > 0)
+                if (XSpeed > 0)
                 {
-                    if (blockedBellow)
+                    if (BlockedBellow)
                         Pose = 0x0D;
-                    xAccel = -decceleration;
+                    XSpeed -= decceleration;
                 }
                 else
                 {
-                    if (-maxXSpeed + xSpeed > acceleration)
-                        xAccel = -maxXSpeed + xSpeed;
+                    if (XSpeed + acceleration > -maxXSpeed)
+                        XSpeed -= acceleration;
                     else
-                        xAccel = -acceleration;
+                        XSpeed = -maxXSpeed;
                 }
-                return;
             }
-            else if ((!blockedBellow || !ducking) && notTwoHDir && keySate.IsKeyDown(Keys.Right) && xSpeed < maxXSpeed)
+            else if ((!BlockedBellow || !ducking) && notTwoHDir && Input.Right.IsKeyHeld())
             {
                 facingRight = true;
-                if (xSpeed < 0)
+                if (XSpeed < 0)
                 {
-                    if (blockedBellow)
+                    if (BlockedBellow)
                         Pose = 0x0D;
-                    xAccel = decceleration;
+                    XSpeed += decceleration;
                 }
                 else
                 {
-                    if (maxXSpeed - xSpeed < acceleration)
-                        xAccel = maxXSpeed - xSpeed;
+                    if (XSpeed + acceleration < maxXSpeed)
+                        XSpeed += acceleration;
                     else
-                        xAccel = acceleration;
+                        XSpeed = maxXSpeed;
                 }
-                return;
             }
+            #endregion
             else
             {
-                //Friction (Decceleration only on ground)
-                if (blockedBellow)
+                # region Friction (Decceleration only on ground)
+                if (BlockedBellow)
                 {
-                    if ((ducking || !keySate.IsKeyDown(Keys.Right)) && xSpeed > 0)
+                    if (!moving && XSpeed > 0)
                     {
-                        if (xSpeed < .125)
-                            xAccel = xSpeed;
+                        if (XSpeed - .125 <= 0)
+                            XSpeed = 0;
                         else
-                            xAccel = -.125;
+                            XSpeed -= .125;
                     }
-                    else if ((ducking || !keySate.IsKeyDown(Keys.Left)) && xSpeed < 0)
+                    else if (!moving && XSpeed < 0)
                     {
-                        if (xSpeed > .125)
-                            xAccel = xSpeed;
+                        if (XSpeed + .125 >= 0)
+                            XSpeed = 0;
                         else
-                            xAccel = .125;
-                    }
-                    else
-                    {
-                        if (facingRight && xSpeed > maxXSpeed)
-                        {
-                            if (xSpeed - maxXSpeed < .125)
-                                xAccel = xSpeed;
-                            else
-                                xAccel = -.125;
-                        }
-                        else if (!facingRight && xSpeed < -maxXSpeed)
-                        {
-                            if (xSpeed + maxXSpeed > .125)
-                                xAccel = xSpeed;
-                            else
-                                xAccel = .125;
-                        }
-                        else
-                            xAccel = 0;
+                            XSpeed += .125;
                     }
                 }
-                else
+                #endregion
+
+                if (facingRight && moving)
                 {
-                    if (facingRight && xSpeed > maxXSpeed)
-                    {
-                        if (xSpeed - maxXSpeed < .125)
-                            xAccel = xSpeed - maxXSpeed;
-                        else
-                            xAccel = -.125;
-                    }
-                    else if (!facingRight && xSpeed < -maxXSpeed)
-                    {
-                        if (xSpeed + maxXSpeed > .125)
-                            xAccel = xSpeed - maxXSpeed;
-                        else
-                            xAccel = .125;
-                    }
-                    else
-                        xAccel = 0;
+                    if (XSpeed + .125 <= maxXSpeed)
+                        XSpeed += .125;
+                }
+                else if (!facingRight && moving)
+                {
+                    if (XSpeed - .125 >= -maxXSpeed)
+                        XSpeed -= .125;
                 }
             }
         }

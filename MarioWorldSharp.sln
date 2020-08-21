@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2010
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30011.22
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarioWorldSharp", "MarioWorldSharp\MarioWorldSharp.csproj", "{0AD93F52-EBD0-4601-A8DD-F70789535CBB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarioWorldSharp", "MarioWorldSharp\MarioWorldSharp.csproj", "{F9A8B512-3D70-4AC9-93A8-5955F0D23523}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,15 +11,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{0AD93F52-EBD0-4601-A8DD-F70789535CBB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0AD93F52-EBD0-4601-A8DD-F70789535CBB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0AD93F52-EBD0-4601-A8DD-F70789535CBB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0AD93F52-EBD0-4601-A8DD-F70789535CBB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F9A8B512-3D70-4AC9-93A8-5955F0D23523}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9A8B512-3D70-4AC9-93A8-5955F0D23523}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F9A8B512-3D70-4AC9-93A8-5955F0D23523}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F9A8B512-3D70-4AC9-93A8-5955F0D23523}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {0C68853E-7801-4C06-905C-03F74223BC30}
+		SolutionGuid = {CEC9F710-B783-434E-8CED-BEB2B5F1196B}
 	EndGlobalSection
 EndGlobal

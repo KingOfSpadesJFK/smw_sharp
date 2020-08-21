@@ -13,38 +13,14 @@
 
 #---------------------------------- Content ---------------------------------#
 
-#begin assets/image/player/small/idle.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=False
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:assets/image/player/small/idle.png
-
-#begin assets/image/player/small/run.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:assets/image/player/small/run.png
-
-#begin assets/font/debug.spritefont
+#begin ../assets/font/debug.spritefont
 /importer:FontDescriptionImporter
 /processor:FontDescriptionProcessor
 /processorParam:PremultiplyAlpha=True
 /processorParam:TextureFormat=Compressed
-/build:assets/font/debug.spritefont
+/build:../assets/font/debug.spritefont;assets/font/debug.spritefont
 
-#begin assets/image/map16/grass1.png
+#begin ../assets/image/map16/grass1.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -54,9 +30,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:assets/image/map16/grass1.png
+/build:../assets/image/map16/grass1.png;assets/image/map16/grass1.png
 
-#begin assets/image/map16/grass2.png
+#begin ../assets/image/map16/grass2.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -66,9 +42,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:assets/image/map16/grass2.png
+/build:../assets/image/map16/grass2.png;assets/image/map16/grass2.png
 
-#begin assets/image/player/small/backward.png
+#begin ../assets/image/player/small/backward.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -78,9 +54,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:assets/image/player/small/backward.png
+/build:../assets/image/player/small/backward.png;assets/image/player/small/backward.png
 
-#begin assets/image/player/small/duck.png
+#begin ../assets/image/player/small/duck.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -90,9 +66,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:assets/image/player/small/duck.png
+/build:../assets/image/player/small/duck.png;assets/image/player/small/duck.png
 
-#begin assets/image/player/small/fall.png
+#begin ../assets/image/player/small/fall.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -102,9 +78,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:assets/image/player/small/fall.png
+/build:../assets/image/player/small/fall.png;assets/image/player/small/fall.png
 
-#begin assets/image/player/small/fastjump.png
+#begin ../assets/image/player/small/fastjump.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -114,9 +90,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:assets/image/player/small/fastjump.png
+/build:../assets/image/player/small/fastjump.png;assets/image/player/small/fastjump.png
 
-#begin assets/image/player/small/fastrun1.png
+#begin ../assets/image/player/small/fastrun1.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -126,9 +102,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:assets/image/player/small/fastrun1.png
+/build:../assets/image/player/small/fastrun1.png;assets/image/player/small/fastrun1.png
 
-#begin assets/image/player/small/fastrun2.png
+#begin ../assets/image/player/small/fastrun2.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -138,9 +114,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:assets/image/player/small/fastrun2.png
+/build:../assets/image/player/small/fastrun2.png;assets/image/player/small/fastrun2.png
 
-#begin assets/image/player/small/forward.png
+#begin ../assets/image/player/small/forward.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -150,9 +126,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:assets/image/player/small/forward.png
+/build:../assets/image/player/small/forward.png;assets/image/player/small/forward.png
 
-#begin assets/image/player/small/jump.png
+#begin ../assets/image/player/small/idle.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -162,9 +138,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:assets/image/player/small/jump.png
+/build:../assets/image/player/small/idle.png;assets/image/player/small/idle.png
 
-#begin assets/image/player/small/lookup.png
+#begin ../assets/image/player/small/jump.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -174,9 +150,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:assets/image/player/small/lookup.png
+/build:../assets/image/player/small/jump.png;assets/image/player/small/jump.png
 
-#begin assets/image/player/small/skid.png
+#begin ../assets/image/player/small/lookup.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -186,5 +162,41 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:assets/image/player/small/skid.png
+/build:../assets/image/player/small/lookup.png;assets/image/player/small/lookup.png
+
+#begin ../assets/image/player/small/run.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../assets/image/player/small/run.png;assets/image/player/small/run.png
+
+#begin ../assets/image/player/small/skid.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../assets/image/player/small/skid.png;assets/image/player/small/skid.png
+
+#begin ../assets/image/ui/uichar.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../assets/image/ui/uichar.png;assets/image/ui/uichar.png
 

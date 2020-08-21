@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MarioWorldSharp.block;
+using MarioWorldSharp.Block;
 
 namespace MarioWorldSharp
 {
@@ -43,18 +43,18 @@ namespace MarioWorldSharp
             return map16;
         }
 
-        public Block GetMap16(int x, int y)
+        public AbstractBlock GetMap16(int x, int y)
         {
             if (map16 == null)
-                return new PassThroughBlock();
+                return Blocks.EMPTY_BLOCK;
             if (x < 0 || x >= 16)
                 throw new IndexOutOfRangeException();
             if (y < 0 || y >= 16)
                 throw new IndexOutOfRangeException();
 
-            Block ret = BlockList.Blocks[map16[x, y]];
+            AbstractBlock ret = BlockList.Map16[map16[x, y]];
             if (ret == null)
-                return new PassThroughBlock();
+                return Blocks.EMPTY_BLOCK;
             return ret;
         }
 

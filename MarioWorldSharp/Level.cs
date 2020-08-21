@@ -8,8 +8,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGame;
-using MonoGame.Utilities;
-using MarioWorldSharp.block;
+using MarioWorldSharp.Block;
 
 namespace MarioWorldSharp
 {
@@ -32,11 +31,34 @@ namespace MarioWorldSharp
                 chunks[i, 0] = new Chunk();
             width = chunks.GetLength(0) * 16;
             height = chunks.GetLength(1) * 16;
-            short[,] chunk = chunks[6, 0].GetMap16Array();
+            short[,] chunk = chunks[1, 0].GetMap16Array();
             chunk[4, 9] = 0x133;
             chunk[5, 9] = 0x134;
             chunk[4, 10] = 0x135;
             chunk[5, 10] = 0x136;
+            chunk[1, 7] = 0x130;
+            chunk[0, 7] = 0x130;
+            chunk[1, 6] = 0x130;
+            chunk[1, 5] = 0x130;
+            chunk = chunks[2, 0].GetMap16Array();
+            chunk[3, 7] = 0x101;
+            chunk[4, 7] = 0x100;
+            chunk[5, 7] = 0x100;
+            chunk[6, 7] = 0x103;
+            chunk[3, 8] = 0x40;
+            chunk[4, 8] = 0x3F;
+            chunk[5, 8] = 0x3F;
+            chunk[6, 8] = 0x41;
+            chunk[3, 9] = 0x40;
+            chunk[4, 9] = 0x3F;
+            chunk[5, 9] = 0x3F;
+            chunk[6, 9] = 0x41;
+            chunk[3, 10] = 0x40;
+            chunk[4, 10] = 0x3F;
+            chunk[5, 10] = 0x3F;
+            chunk[6, 10] = 0x41;
+            chunk[10, 10] = 0x130;
+            chunk[11, 9] = 0x130;
         }
 
         public void Scroll(double playerX, double playerY)
@@ -100,7 +122,7 @@ namespace MarioWorldSharp
             return ret;
         }
 
-        public Block GetMap16(int x, int y)
+        public AbstractBlock GetMap16(int x, int y)
         {
             if (x >= width)
                 x = width - 1;
@@ -114,11 +136,16 @@ namespace MarioWorldSharp
 
             return chunks[x / 16, y / 16].GetMap16(x % 16, y % 16);
         }
+
+        public AbstractBlock GetMap16FromPosition(double x, double y)
+        {
+            return GetMap16((int)x / 16, (int)y / 16);
+        }
     }
     
     public static class BlockList
     {
-        public static Block[] Blocks =
+        public static AbstractBlock[] Map16 =
         {
             null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
             null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
@@ -137,10 +164,10 @@ namespace MarioWorldSharp
             null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
             null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
 
-            new Ledge(), new Ledge(), new Ledge(), new Ledge(), new Ledge(), new Ledge(), new Ledge(), new Ledge(), new Ledge(), new Ledge(), new Ledge(), new Ledge(), new Ledge(), new Ledge(), new Ledge(), new Ledge(),
+            Blocks.LEDGE_BLOCK, Blocks.LEDGE_BLOCK, Blocks.LEDGE_BLOCK, Blocks.LEDGE_BLOCK, Blocks.LEDGE_BLOCK, Blocks.LEDGE_BLOCK, Blocks.LEDGE_BLOCK, Blocks.LEDGE_BLOCK, Blocks.LEDGE_BLOCK, Blocks.LEDGE_BLOCK, Blocks.LEDGE_BLOCK, Blocks.LEDGE_BLOCK, Blocks.LEDGE_BLOCK, Blocks.LEDGE_BLOCK, Blocks.LEDGE_BLOCK, Blocks.LEDGE_BLOCK,
             null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
             null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
-            new SolidBlock(), null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
+            Blocks.SOLID_BLOCK, null, null, Blocks.SOLID_BLOCK, Blocks.SOLID_BLOCK, Blocks.SOLID_BLOCK, Blocks.SOLID_BLOCK, null, null, null, null, null, null, null, null, null,
             null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
             null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
             null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
