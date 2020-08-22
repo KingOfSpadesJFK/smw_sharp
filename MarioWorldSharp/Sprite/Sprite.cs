@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGame;
+using static MarioWorldSharp.Level;
 
 namespace MarioWorldSharp.Sprite
 {
@@ -40,26 +41,33 @@ namespace MarioWorldSharp.Sprite
         public bool BlockedLeft { get; set; }
         public bool BlockedRight { get; set; }
         public SpriteStatus Status { get; set; }
-
-        //Index to spawn order. Set to -1 if not indexed to a spawn order, like if it was spawned from another sprite
-        public int Index { get; }  
+        public SpriteData Data { get; }
         public void Process();
+        public void Draw(SpriteBatch spriteBatch);
         public Rectangle GetCollisionBox();
     }
 
+    public class SpriteData
+    {
+        public SpriteID ID;
+        public int Index;
+        public bool Spawned;
+        public bool DisposeOffscreen;
+        public int DespawnThresh = 16;
+    }
     public abstract class Sprite : IDisposable, ISprite
     {
         private double _xPos;
         private double _yPos;
-        protected Rectangle _collisionBox;
+        protected Rectangle collisionBox;
         public double XPosition
         {
             get => _xPos;
             set
             {
                 _xPos = value;
-                if (_collisionBox != null)
-                    _collisionBox.X = (int)value;
+                if (collisionBox != null)
+                    collisionBox.X = (int)value;
             }
         }
         public double YPosition
@@ -68,8 +76,8 @@ namespace MarioWorldSharp.Sprite
             set
             {
                 _yPos = value;
-                if (_collisionBox != null)
-                    _collisionBox.Y = (int)value;
+                if (collisionBox != null)
+                    collisionBox.Y = (int)value;
             }
         }
         public double XSpeed { get; set; }
@@ -81,57 +89,131 @@ namespace MarioWorldSharp.Sprite
         public bool BlockedLeft { get; set; }
         public bool BlockedRight { get; set; }
         public SpriteStatus Status { get; set; }
-        public int Index { get; }
+        public SpriteData Data { get; set; }
 
-        public Sprite(double x, double y, int index)
+        public Sprite(double x, double y, SpriteData d)
         {
-            this._collisionBox = Rectangle.Empty;
             this.XPosition = x; this.YPosition = y;
+            if (d.DisposeOffscreen)
+            {
+                OffScreen(d.DespawnThresh, d.DisposeOffscreen);
+                if (this.disposedValue)
+                    return;
+            }
+            d.Spawned = true;
+            this.collisionBox = Rectangle.Empty;
             this.Status = SpriteStatus.Normal;
-            this.Index = index;
+            this.Data = d;
+            SpriteHandler.AddSprites(this);
         }
 
         public abstract void Process();
 
         public Rectangle GetCollisionBox()
         {
-            return _collisionBox;
+            return collisionBox;
         }
 
-        protected void UpdateXPositionition()
+        protected virtual void UpdateXPosition()
         {
             double gravity = HorizGravity * .375;
             if (XSpeed < 64.0 / 16.0)
                 XSpeed += gravity;
             XPosition += XSpeed;
+            if (XSpeed != 0.0)
+                SpriteHandler.UpdateSpriteTree(this, false);
         }
 
-        protected void UpdateYPositionition()
+        protected virtual void UpdateYPosition()
         {
             double gravity = VertGravity * .375;
             if (YSpeed < 64.0 / 16.0)
                 YSpeed += gravity;
             YPosition += YSpeed;
+            if (YSpeed != 0.0)
+                SpriteHandler.UpdateSpriteTree(this, false);
         }
-        protected void EnvironmentCollision()
+
+        protected virtual void UpdateXYPosition()
+        {
+            double gravity = HorizGravity * .375;
+            if (XSpeed < 64.0 / 16.0)
+                XSpeed += gravity;
+            XPosition += XSpeed;
+
+            gravity = VertGravity * .375;
+            if (YSpeed < 64.0 / 16.0)
+                YSpeed += gravity;
+            YPosition += YSpeed;
+
+            if (YSpeed != 0.0 || XSpeed != 0.0)
+                SpriteHandler.UpdateSpriteTree(this, false);
+        }
+
+        private static readonly int SideVertColisionOffset = 5;
+        private static readonly int SideHorizCollisionOffset = 3;
+        private static readonly int TopBotHorizCollisionOffset = 8;
+        protected virtual void EnvironmentCollision()
+        {
+            BlockedAbove = false;
+            BlockedBellow = false;
+            BlockedLeft = false;
+            BlockedRight = false;
+
+            //Check left collision
+            SMW.Level.GetMap16FromPosition(collisionBox.Left + SideHorizCollisionOffset, collisionBox.Top + TopBotHorizCollisionOffset).Left(this, collisionBox.Left + SideHorizCollisionOffset, collisionBox.Top + TopBotHorizCollisionOffset);
+            SMW.Level.GetMap16FromPosition(collisionBox.Left + SideHorizCollisionOffset, collisionBox.Bottom - TopBotHorizCollisionOffset).Left(this, collisionBox.Left + SideHorizCollisionOffset, collisionBox.Bottom - TopBotHorizCollisionOffset);
+
+            //Check right collision
+            SMW.Level.GetMap16FromPosition(collisionBox.Right - SideHorizCollisionOffset, collisionBox.Top + TopBotHorizCollisionOffset).Right(this, collisionBox.Right - SideHorizCollisionOffset, collisionBox.Top + TopBotHorizCollisionOffset);
+            SMW.Level.GetMap16FromPosition(collisionBox.Right - SideHorizCollisionOffset, collisionBox.Bottom - TopBotHorizCollisionOffset).Right(this, collisionBox.Right - SideHorizCollisionOffset, collisionBox.Bottom - TopBotHorizCollisionOffset);
+
+            //Check bottom collision
+            SMW.Level.GetMap16FromPosition(collisionBox.Left + SideVertColisionOffset, collisionBox.Bottom).Bellow(this, collisionBox.Left + SideVertColisionOffset, collisionBox.Bottom);
+            SMW.Level.GetMap16FromPosition(collisionBox.Right - SideVertColisionOffset, collisionBox.Bottom).Bellow(this, collisionBox.Right - SideVertColisionOffset, collisionBox.Bottom);
+
+            //Check top collision
+            SMW.Level.GetMap16FromPosition(collisionBox.Left + SideVertColisionOffset, collisionBox.Top).Above(this, collisionBox.Left + SideVertColisionOffset, collisionBox.Top);
+            SMW.Level.GetMap16FromPosition(collisionBox.Right - SideVertColisionOffset, collisionBox.Top).Above(this, collisionBox.Right - SideVertColisionOffset, collisionBox.Top);
+        }
+
+        protected virtual void PlayerCollision()
+        {
+            //TODO: Implement
+        }
+        protected virtual void SpriteCollision()
         {
             //TODO: Implement
         }
 
-        protected void PlayerCollision()
+        protected bool[] OffScreen(double borderSize, bool dispose)
         {
             //TODO: Implement
-        }
-        protected void SpriteCollision()
-        {
-            //TODO: Implement
-        }
+            bool[] off =  new[]
+            {
+                XPosition < SMW.Level.X - borderSize,
+                XPosition > SMW.Level.X + 400 + borderSize,
+                YPosition < SMW.Level.Y - borderSize,
+                YPosition > SMW.Level.Y + 224 + borderSize
+            };
 
-        protected void OffScreen(byte sub)
+            if (!dispose)
+                return off;
+
+            foreach (bool b in off)
+                if (b)
+                    this.Dispose();
+
+            return off;
+        }
+        protected virtual void Kill()
         {
-            //TODO: Implement
-            if (XPosition < MarioWorld.level.X)
-                this.Dispose();
+            SMW.Level.RemoveSprite(Data);
+            this.Dispose();
+        }
+        public virtual void Draw(SpriteBatch spriteBatch)
+        {
+            
         }
 
         #region IDisposable Support
@@ -144,7 +226,12 @@ namespace MarioWorldSharp.Sprite
                 if (disposing)
                 {
                     // TODO: dispose managed state (managed objects).
-                    Status = SpriteStatus.NonExistent;
+                    if (Status != SpriteStatus.NonExistent)
+                    {
+                        Status = SpriteStatus.NonExistent;
+                        SMW.Level.HideSprite(Data);
+                        SpriteHandler.UpdateSpriteTree(this, true);
+                    }
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
@@ -168,6 +255,8 @@ namespace MarioWorldSharp.Sprite
             // TODO: uncomment the following line if the finalizer is overridden above.
             GC.SuppressFinalize(this);
         }
+
         #endregion
+
     }
 }

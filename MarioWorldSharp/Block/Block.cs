@@ -15,22 +15,22 @@ namespace MarioWorldSharp.Block
 {
     public abstract class AbstractBlock
     {
-        public abstract void Above(Player Mario, double x, double y);
-        public abstract void Bellow(Player Mario, double x, double y);
-        public abstract void Left(Player Mario, double x, double y);
-        public abstract void Right(Player Mario, double x, double y);
-        public abstract void TopCorner(Player Mario, double x, double y);
-        public abstract void BodyInside(Player Mario, double x, double y);
-        public abstract void HeadInside(Player Mario, double x, double y);
-        public abstract void WallRun(Player Mario, double x, double y);
-        public abstract void Cape(double x, double y);
-        public abstract void Fireball(double x, double y);
+        public virtual void Above(Player p, double x, double y) {}
+        public virtual void Bellow(Player p, double x, double y) {}
+        public virtual void Left(Player p, double x, double y) {}
+        public virtual void Right(Player p, double x, double y) {}
+        public virtual void TopCorner(Player p, double x, double y) {}
+        public virtual void BodyInside(Player p, double x, double y) {}
+        public virtual void HeadInside(Player p, double x, double y) {}
+        public virtual void WallRun(Player p, double x, double y) {}
+        public virtual void Cape(double x, double y) {}
+        public virtual void Fireball(double x, double y) {}
 
-        public abstract void Above(ISprite sprite, double x, double y);
-        public abstract void Bellow(ISprite sprite, double x, double y);
-        public abstract void Left(ISprite sprite, double x, double y);
-        public abstract void Right(ISprite sprite, double x, double y);
-        public abstract void TopCorner(ISprite sprite, double x, double y);
-        public abstract void BodyInside(ISprite sprite, double x, double y);
+        public virtual void Above(ISprite s, double x, double y) {}
+        public virtual void Bellow(ISprite s, double x, double y) {}
+        public virtual void Left(ISprite s, double x, double y) {}
+        public virtual void Right(ISprite s, double x, double y) {}
+        public virtual void TopCorner(ISprite s, double x, double y) {}
+        public virtual void BodyInside(ISprite s, double x, double y) {}
     }
 }

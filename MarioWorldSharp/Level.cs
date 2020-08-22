@@ -9,20 +9,50 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGame;
 using MarioWorldSharp.Block;
+using MarioWorldSharp.Sprite;
+using KdTree;
+using KdTree.Math;
+using System.Reflection.Metadata.Ecma335;
 
 namespace MarioWorldSharp
 {
     public class Level
     {
         private Chunk[,] chunks;
-        public double X { get; set; }
-        public double Y { get; set; }
+
+        private double _midX;
+        private double _midY;
+        private double _xPos;
+        private double _yPos;
+        public double X 
+        {
+            get { return _xPos; }
+            set
+            {
+                _xPos = value;
+                _midX = _xPos + 200.0;
+            }
+        }
+        public double Y
+        {
+            get { return _yPos; }
+            set
+            {
+                _yPos = value;
+                _midY = _yPos + 112.0;
+            }
+        }
+        public KdTree<double, SpriteData> Sprites { get; set; }
         private Level nextLayer;
         private Level prevLayer;
         private int width;
         private int height;
         private double XScrollMultiplier;
         private double YScrollMultiplier;
+        private int SpriteCount;
+
+        private int scrollingHorz;
+        private int scrollingVert;
 
         public Level()
         {
@@ -31,6 +61,11 @@ namespace MarioWorldSharp
                 chunks[i, 0] = new Chunk();
             width = chunks.GetLength(0) * 16;
             height = chunks.GetLength(1) * 16;
+            Sprites = new KdTree<double, SpriteData>(2, new DoubleMath());
+            SpriteCount = 0;
+            X = 0; Y = 0;
+
+            #region Autogenerate Level
             short[,] chunk = chunks[1, 0].GetMap16Array();
             chunk[4, 9] = 0x133;
             chunk[5, 9] = 0x134;
@@ -59,28 +94,56 @@ namespace MarioWorldSharp
             chunk[6, 10] = 0x41;
             chunk[10, 10] = 0x130;
             chunk[11, 9] = 0x130;
+
+            Random rand = new Random();
+            for (int i = 0; i < 500; i++)
+                AddSprite(rand.NextDouble() * 5000.0, 60, SpriteID.GreenShellessKoopa);
+
+            #endregion
         }
 
+        private void AddSprite(double x, double y, SpriteID s)
+        {
+            Sprites.Add(new[] { x, y }, new SpriteData { ID = s, Index = SpriteCount, Spawned = false });
+            SpriteCount++;
+        }
         public void Scroll(double playerX, double playerY)
         {
-            if (playerX - X >= 200 + 24)
-                X = playerX - 200 - 24;
-            else if (playerX - X <= 200 - 24)
-                X = playerX - 200 + 24;
+            double newX = X;
+            double newY = Y;
+            if (playerX - newX >= 200 + 24)
+                newX = playerX - 200 - 24;
+            else if (playerX - newX <= 200 - 24)
+                newX = playerX - 200 + 24;
 
-            if (X < 0)
-                X = 0;
-            if (Y < 0)
-                Y = 0;
-            if (X >= width * 16 - 400)
-                X = width * 16 - 401;
-            if (Y >= height * 16 - 224)
-                Y = height * 16 - 225;
+            if (newX < 0)
+                newX = 0;
+            if (newY < 0)
+                newY = 0;
+            if (newX >= width * 16 - 400)
+                newX = width * 16 - 401;
+            if (newY >= height * 16 - 224)
+                newY = height * 16 - 225;
+
+            if (newX > X)
+                scrollingHorz = 1;
+            else if (newX < X)
+                scrollingHorz = -1;
+            else
+                scrollingHorz = 0;
+
+            if (newY > Y)
+                scrollingVert = 1;
+            else if (newY < Y)
+                scrollingVert = -1;
+            else
+                scrollingVert = 0;
+            X = newX; Y = newY;
         }
 
-        public Level(Chunk[,] level)
+        public Level(Chunk[,] Level)
         {
-            chunks = level;
+            chunks = Level;
         }
 
         public Level GetNextLayer()
@@ -140,6 +203,80 @@ namespace MarioWorldSharp
         public AbstractBlock GetMap16FromPosition(double x, double y)
         {
             return GetMap16((int)x / 16, (int)y / 16);
+        }
+
+        public void RemoveSprite(SpriteData s)
+        {
+            if (Sprites.TryFindValue(s, out double[] point) )
+            {
+                Sprites.RemoveAt(point);
+            }
+        }
+
+        public void HideSprite(SpriteData s)
+        {
+            if (Sprites.TryFindValue(s, out double[] point))
+                Sprites.FindValueAt(point).Spawned = false;
+        }
+
+        public void SpawnSprites()
+        {
+            KdTreeNode<double, SpriteData>[] sprites = Sprites.RadialSearch(new[] { _midX, _midY }, 264.0);
+
+            foreach (KdTreeNode<double, SpriteData> n in sprites)
+            {
+                SpriteData d = n.Value;
+                if (!d.Spawned)
+                {
+                    d.Spawned = true;
+                    SpriteSpawner.SpawnSprite(n.Point, d);
+                }
+            }
+        }
+
+        public void SpawnSpritesOnScroll()
+        {
+            if (scrollingHorz == 0 && scrollingVert == 0)
+                return;
+
+            double x = 200;
+            double y = 112;
+            switch (scrollingHorz)
+            {
+                case 1:
+                    x = 400;
+                    break;
+                case -1:
+                    x = 0;
+                    break;
+            }
+            switch (scrollingVert)
+            {
+                case 1:
+                    y = 224;
+                    break;
+                case -1:
+                    y = 0;
+                    break;
+            }
+            KdTreeNode<double, SpriteData>[] sprites = Sprites.RadialSearch(new[] { X + x, Y + y }, 112.0);
+
+            foreach (KdTreeNode<double, SpriteData> n in sprites)
+            {
+                SpriteData d = n.Value;
+                double x2 = n.Point[0] - X;
+                double y2 = n.Point[1] - Y;
+                if (!d.Spawned)
+                {
+                    if ((scrollingHorz < 0 && x2 < 0.0) ||
+                        (scrollingHorz > 0 && x2 > 400.0) ||
+                        (scrollingVert < 0 && y2 < 0.0) ||
+                        (scrollingVert > 0 && y2 > 224.0) )
+                    {
+                        SpriteSpawner.SpawnSprite(n.Point, d);
+                    }
+                }
+            }
         }
     }
     

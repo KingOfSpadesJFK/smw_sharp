@@ -14,207 +14,112 @@ namespace MarioWorldSharp.Block
 {
     public class SolidBlock : AbstractBlock
     {
-        public override void Above(Player Mario, double x, double y)
+        public override void Above(Player p, double x, double y)
         {
-            if (Mario.BlockedAbove)
+            if (p.BlockedAbove)
                 return;
 
-            if (Mario.YSpeed < 0)
+            if (p.YSpeed < 0)
             {
-                Mario.YSpeed = 0;
+                p.YSpeed = 0;
             }
-            Mario.BlockedAbove = true;
-            Mario.YPosition = Mario.YPosition + 16.0 - (Mario.YPosition % 16.0);
+            p.BlockedAbove = true;
+            p.YPosition = p.YPosition + 16.0 - (p.YPosition % 16.0);
         }
 
-        public override void Above(ISprite Sprite, double x, double y)
+        public override void Above(ISprite s, double x, double y)
         {
-            if (Sprite.BlockedAbove)
+            if (s.BlockedAbove)
                 return;
 
-            if (Sprite.YSpeed < 0)
+            if (s.YSpeed < 0)
             {
-                Sprite.YSpeed = 0;
+                s.YSpeed = 0;
             }
-            Sprite.BlockedAbove = true;
-            Sprite.YPosition = Sprite.YPosition + 16.0 - (Sprite.YPosition % 16.0);
+            s.BlockedAbove = true;
+            s.YPosition = s.YPosition + 16.0 - (s.YPosition % 16.0);
         }
 
-        public override void Bellow(Player Mario, double x, double y)
+        public override void Bellow(Player p, double x, double y)
         {
-            if (Mario.BlockedBellow)
+            if (p.BlockedBellow)
                 return;
 
-            if (Mario.YSpeed > 0)
+            if (p.YSpeed > 0)
             {
-                Mario.YSpeed = 0;
+                p.YSpeed = 0;
             }
-            Mario.BlockedBellow = true;
-            Mario.YPosition = Mario.YPosition - (Mario.YPosition % 16.0);
+            p.BlockedBellow = true;
+            p.YPosition = p.YPosition - (p.YPosition % 16.0);
         }
 
-        public override void Bellow(ISprite Sprite, double x, double y)
+        public override void Bellow(ISprite s, double x, double y)
         {
-            if (Sprite.BlockedBellow)
+            if (s.BlockedBellow)
                 return;
 
-            if (Sprite.YSpeed > 0)
+            if (s.YSpeed > 0)
             {
-                Sprite.YSpeed = 0;
+                s.YSpeed = 0;
             }
-            Sprite.BlockedBellow = true;
-            Sprite.YPosition = Sprite.YPosition - (Sprite.YPosition % 16.0);
+            s.BlockedBellow = true;
+            s.YPosition = s.YPosition - (s.YPosition % 16.0);
         }
 
-        public override void Left(Player Mario, double x, double y)
+        public override void Left(Player p, double x, double y)
         {
-            if (Mario.BlockedLeft)
+            if (p.BlockedLeft)
                 return;
 
-            if (Mario.XSpeed < 0)
+            if (p.XSpeed < 0)
             {
-                Mario.XSpeed = 0;
+                p.XSpeed = 0;
             }
-            Mario.BlockedLeft = true;
-            Mario.XPosition = Mario.XPosition + 16.0 - (Mario.XPosition % 16.0) - Player.HorizCollisionOffset;
+            p.BlockedLeft = true;
+            p.XPosition = p.XPosition + 16.0 - (p.XPosition % 16.0) - Player.SideHorizCollisionOffset;
         }
 
-        public override void Left(ISprite Sprite, double x, double y)
+        public override void Left(ISprite s, double x, double y)
         {
-            if (Sprite.BlockedLeft)
+            if (s.BlockedLeft)
                 return;
 
-            if (Sprite.XSpeed < 0)
+            if (s.XSpeed < 0)
             {
-                Sprite.XSpeed = 0;
+                s.XSpeed = 0;
             }
-            Sprite.BlockedLeft = true;
-            Sprite.XPosition = Sprite.XPosition + 16.0 - (Sprite.XPosition % 16.0) - Player.HorizCollisionOffset;
+            s.BlockedLeft = true;
+            s.XPosition = s.XPosition + 16.0 - (s.XPosition % 16.0);
         }
 
-        public override void Right(Player Mario, double x, double y)
+        public override void Right(Player p, double x, double y)
         {
-            if (Mario.BlockedRight)
+            if (p.BlockedRight)
                 return;
 
-            if (Mario.XSpeed > 0)
+            if (p.XSpeed > 0)
             {
-                Mario.XSpeed = 0;
+                p.XSpeed = 0;
             }
-            Mario.BlockedRight = true;
-            Mario.XPosition = Mario.XPosition - (Mario.XPosition % 16.0) + Player.HorizCollisionOffset;
+            p.BlockedRight = true;
+            p.XPosition = p.XPosition - (p.XPosition % 16.0) + Player.SideHorizCollisionOffset;
         }
 
-        public override void Right(ISprite Sprite, double x, double y)
+        public override void Right(ISprite s, double x, double y)
         {
-            if (Sprite.BlockedRight)
+            if (s.BlockedRight)
                 return;
 
-            if (Sprite.XSpeed > 0)
+            if (s.XSpeed > 0)
             {
-                Sprite.XSpeed = 0;
+                s.XSpeed = 0;
             }
-            Sprite.BlockedRight = true;
-            Sprite.XPosition = Sprite.XPosition - (Sprite.XPosition % 16.0) + Player.HorizCollisionOffset;
-        }
-
-        public override void BodyInside(Player Mario, double x, double y)
-        {
-        }
-
-        public override void BodyInside(ISprite Sprite, double x, double y)
-        {
-        }
-
-        public override void Cape(double x, double y)
-        {
-        }
-
-        public override void Fireball(double x, double y)
-        {
-        }
-
-        public override void HeadInside(Player Mario, double x, double y)
-        {
-        }
-
-        public override void TopCorner(Player Mario, double x, double y)
-        {
-        }
-
-        public override void TopCorner(ISprite Sprite, double x, double y)
-        {
-        }
-
-        public override void WallRun(Player Mario, double x, double y)
-        {
+            s.BlockedRight = true;
+            s.XPosition = s.XPosition - (s.XPosition % 16.0);
         }
     }
 
     public class PassThroughBlock : AbstractBlock
     {
-        public override void Above(Player Mario, double x, double y)
-        {
-        }
-
-        public override void Above(ISprite Sprite, double x, double y)
-        {
-        }
-
-        public override void Bellow(Player Mario, double x, double y)
-        {
-        }
-
-        public override void Bellow(ISprite Sprite, double x, double y)
-        {
-        }
-
-        public override void Left(Player Mario, double x, double y)
-        {
-        }
-
-        public override void Left(ISprite Sprite, double x, double y)
-        {
-        }
-
-        public override void Right(Player Mario, double x, double y)
-        {
-        }
-
-        public override void Right(ISprite Sprite, double x, double y)
-        {
-        }
-
-        public override void BodyInside(Player Mario, double x, double y)
-        {
-        }
-
-        public override void BodyInside(ISprite Sprite, double x, double y)
-        {
-        }
-
-        public override void Cape(double x, double y)
-        {
-        }
-
-        public override void Fireball(double x, double y)
-        {
-        }
-
-        public override void HeadInside(Player Mario, double x, double y)
-        {
-        }
-
-        public override void TopCorner(Player Mario, double x, double y)
-        {
-        }
-
-        public override void TopCorner(ISprite Sprite, double x, double y)
-        {
-        }
-
-        public override void WallRun(Player Mario, double x, double y)
-        {
-        }
     }
 }

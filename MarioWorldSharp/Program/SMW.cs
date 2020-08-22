@@ -9,6 +9,12 @@ using Microsoft.Xna.Framework.Input;
 using MonoGame;
 using System;
 
+using MarioWorldSharp.Sprite;
+using KdTree;
+using KdTree.Math;
+using System.Linq;
+using static MarioWorldSharp.Level;
+
 namespace MarioWorldSharp
 {
     /// <summary>
@@ -16,7 +22,7 @@ namespace MarioWorldSharp
     /// </summary>
     /// 
 
-    public class MarioWorld : Game
+    public class SMW : Game
     {
         GraphicsDeviceManager graphics;
         RenderTarget2D gamescreen;
@@ -26,9 +32,9 @@ namespace MarioWorldSharp
         bool resChange;
         float scale;
 
-        public static Player Mario;
-        public static Level level;
-        public static int gameMode;
+        public static Player Character;
+        public static Level Level;
+        public static int GameMode;
         public static Color colorDisp;
 
         readonly int ResWidth = 400;
@@ -36,18 +42,18 @@ namespace MarioWorldSharp
         readonly int ResHeight = 224;
         readonly float ResHeightF = 224F;
         private bool drawCollision = false;
-
         public static InputEvent InputEvent = new InputEvent();
 
-        public MarioWorld()
+        public SMW()
         {
             scale = 3f;
             resChange = false;
             graphics = new GraphicsDeviceManager(this);
             graphics.PreferredBackBufferWidth = (int) (ResWidth * scale);
             graphics.PreferredBackBufferHeight = (int) (ResHeight * scale);
+            graphics.HardwareModeSwitch = false;
             Content.RootDirectory = "Content";
-            gameMode = 0;
+            GameMode = 0;
             colorDisp = new Color();
 
             InputEvent.DEBUG_ShowHitboxEvent += ShowHitbox;
@@ -62,8 +68,9 @@ namespace MarioWorldSharp
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            level = new Level();
-            Mario = new Player();
+            Level = new Level();
+            Character = new Player();
+            Level.SpawnSprites();
             gamescreen = new RenderTarget2D(graphics.GraphicsDevice, ResWidth, ResHeight, false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
             base.Initialize();
         }
@@ -78,25 +85,25 @@ namespace MarioWorldSharp
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // TODO: use this.Content to load your game content here
-            Texture2D[] smallMarioPoses;
+            Texture2D[] smallPoses;
             Texture2D map16_page1;
             Texture2D map16_page2;
-            smallMarioPoses = new Texture2D[70];
-            smallMarioPoses[0] = Content.Load<Texture2D>("assets\\image\\player\\small\\idle");
-            smallMarioPoses[1] = Content.Load<Texture2D>("assets\\image\\player\\small\\run");
-            smallMarioPoses[2] = smallMarioPoses[1];
-            smallMarioPoses[3] = Content.Load<Texture2D>("assets\\image\\player\\small\\lookup");
-            smallMarioPoses[4] = Content.Load<Texture2D>("assets\\image\\player\\small\\fastrun1");
-            smallMarioPoses[5] = Content.Load<Texture2D>("assets\\image\\player\\small\\fastrun2");
-            smallMarioPoses[6] = smallMarioPoses[5];
-            smallMarioPoses[0x0B] = Content.Load<Texture2D>("assets\\image\\player\\small\\jump");
-            smallMarioPoses[0x0C] = Content.Load<Texture2D>("assets\\image\\player\\small\\fastjump");
-            smallMarioPoses[0x0D] = Content.Load<Texture2D>("assets\\image\\player\\small\\skid");
-            smallMarioPoses[0x0F] = Content.Load<Texture2D>("assets\\image\\player\\small\\forward");
-            smallMarioPoses[0x24] = Content.Load<Texture2D>("assets\\image\\player\\small\\fall");
-            smallMarioPoses[0x39] = Content.Load<Texture2D>("assets\\image\\player\\small\\backward");
-            smallMarioPoses[0x3C] = Content.Load<Texture2D>("assets\\image\\player\\small\\duck");
-            Mario.Poses = smallMarioPoses;
+            smallPoses = new Texture2D[70];
+            smallPoses[0] = Content.Load<Texture2D>("assets\\image\\player\\small\\idle");
+            smallPoses[1] = Content.Load<Texture2D>("assets\\image\\player\\small\\run");
+            smallPoses[2] = smallPoses[1];
+            smallPoses[3] = Content.Load<Texture2D>("assets\\image\\player\\small\\lookup");
+            smallPoses[4] = Content.Load<Texture2D>("assets\\image\\player\\small\\fastrun1");
+            smallPoses[5] = Content.Load<Texture2D>("assets\\image\\player\\small\\fastrun2");
+            smallPoses[6] = smallPoses[5];
+            smallPoses[0x0B] = Content.Load<Texture2D>("assets\\image\\player\\small\\jump");
+            smallPoses[0x0C] = Content.Load<Texture2D>("assets\\image\\player\\small\\fastjump");
+            smallPoses[0x0D] = Content.Load<Texture2D>("assets\\image\\player\\small\\skid");
+            smallPoses[0x0F] = Content.Load<Texture2D>("assets\\image\\player\\small\\forward");
+            smallPoses[0x24] = Content.Load<Texture2D>("assets\\image\\player\\small\\fall");
+            smallPoses[0x39] = Content.Load<Texture2D>("assets\\image\\player\\small\\backward");
+            smallPoses[0x3C] = Content.Load<Texture2D>("assets\\image\\player\\small\\duck");
+            Character.Poses = smallPoses;
             map16_page1 = Content.Load<Texture2D>("assets\\image\\map16\\grass1");
             map16_page2 = Content.Load<Texture2D>("assets\\image\\map16\\grass2");
             debugFont = Content.Load<SpriteFont>("assets\\font\\debug");
@@ -161,8 +168,9 @@ namespace MarioWorldSharp
 
         private void LevelGameMode()
         {
-            Mario.Process();
-            level.Scroll(Mario.XPosition, Mario.YPosition);
+            Character.Process();
+            SpriteHandler.ProcessSprites();
+            Level.Scroll(Character.XPosition, Character.YPosition);
         }
 
         /// <summary>
@@ -172,7 +180,7 @@ namespace MarioWorldSharp
         protected override void Draw(GameTime gameTime)
         {
             var key = Keyboard.GetState();
-            //Resolution changing
+            #region Resolution changing
             if (!resChange && key.IsKeyDown(Keys.D1))
             {
                 if (graphics.IsFullScreen)
@@ -233,6 +241,7 @@ namespace MarioWorldSharp
             }
             else if (resChange && key.IsKeyUp(Keys.D1) && key.IsKeyUp(Keys.D2) && key.IsKeyUp(Keys.D3) && key.IsKeyUp(Keys.D4) && key.IsKeyUp(Keys.D5))
                 resChange = false;
+            #endregion
 
             GraphicsDevice.SetRenderTarget(gamescreen);
             GraphicsDevice.Clear(Color.CornflowerBlue);
@@ -241,7 +250,7 @@ namespace MarioWorldSharp
 
             //Level Drawing
             //TODO: Optimize routine
-            Level layer = level;
+            Level layer = Level;
             while (layer != null)
             {
                 short[,] leveldraw = layer.GetCameraSelection();
@@ -249,21 +258,29 @@ namespace MarioWorldSharp
                 {
                     for (int j = 0; j < leveldraw.GetLength(1); j++)
                     {
-                        spriteBatch.Draw(map16Textures[leveldraw[i, j]], new Vector2((int)-level.X % 16 + (i * 16), (int)-level.Y % 16 + (j * 16)), Color.White);
+                        spriteBatch.Draw(map16Textures[leveldraw[i, j]], new Vector2((int)-Level.X % 16 + (i * 16), (int)-Level.Y % 16 + (j * 16)), Color.White);
                     }
                 }
                 layer = layer.GetNextLayer();
             }
-            spriteBatch.Draw(Mario.GetTexture(),
-                new Rectangle((int)Mario.XPosition - (int)level.X, (int) Mario.YPosition + Mario.YDrawDisplacement - (int)level.Y, Mario.GetTexture().Width, Mario.GetTexture().Height),
-                new Rectangle(0, 0, Mario.GetTexture().Width, Mario.GetTexture().Height), 
-                Color.White, 0.0F, Vector2.Zero, Mario.GetSpriteEffect(), 1F);
+
+            //Draw player
+            Character.Draw(spriteBatch);
+
+            //Draw Sprites
+            ISprite[] sprites = SpriteHandler.ToArray();
+            foreach (ISprite s in sprites)
+                s?.Draw(spriteBatch);
+
             if (drawCollision)
             {
-                Texture2D box = createRectangleTexture(Mario.GetCollisionBox(), new Color(64, 0, 0, 100), new Color(255, 45, 45, 100));
-                spriteBatch.Draw(box, new Vector2((int)Mario.GetCollisionBox().X - (int)level.X, (int)Mario.GetCollisionBox().Y - (int)level.Y), Color.White);
+                Texture2D box = CreateRectangleTexture(Character.GetCollisionBox(), new Color(64, 0, 0, 100), new Color(255, 45, 45, 100));
+                Texture2D cross = CreateCrossTexture(Color.Black);
+                spriteBatch.Draw(box, new Vector2(Character.GetCollisionBox().X - (int)Level.X, Character.GetCollisionBox().Y - (int)Level.Y), Color.White);
+                spriteBatch.Draw(cross, new Vector2((int)Character.XPosition - (int)Level.X - 1, (int)Character.YPosition - (int)Level.Y - 1), Color.White);
                 spriteBatch.End();
                 box.Dispose();
+                cross.Dispose();
             }
             else
                 spriteBatch.End();
@@ -301,14 +318,14 @@ namespace MarioWorldSharp
             spriteBatch.Begin();
             string debug = graphics.PreferredBackBufferWidth + "x" + graphics.PreferredBackBufferHeight + "\nScale: " + scale + ", True Scale: " + trueScale + "\n"
                 + $"{(int)(1.0 / gameTime.ElapsedGameTime.TotalSeconds)}FPS \n"
-                + "Player: (" + Mario.XPosition + ", " + Mario.YPosition + ")\n"
-                + "Player (Integral): (" + (int)Mario.XPosition + ", " + (int)Mario.YPosition + ")\n"
-                + "Camera: (" + (int)level.X + ", " + (int)level.Y + ")\n"
-                + "Player Block Position: (" + (int)(Mario.XPosition / 16) + ", " + (int)(Mario.YPosition / 16) + ")\n"
-                + "Player Within Chunk: (" + (int) ((Mario.XPosition / 16) % 16) + ", " + (int) ((Mario.YPosition / 16) % 16) + ")\n"
-                + "Player Chunk: (" + (int)((Mario.XPosition / 16) / 16) + ", " + (int)((Mario.YPosition / 16) / 16) + ")\n"
-                + "Speed: (" + Mario.XSpeed + "," + Mario.YSpeed + ")\n"
-                + "Speed (SMW Units): (" + (int)(Mario.XSpeed * 16.0) + "," + (int)(Mario.YSpeed * 16.0) + ")\n"
+                + "Player: (" + Character.XPosition + ", " + Character.YPosition + ")\n"
+                + "Player (Integral): (" + (int)Character.XPosition + ", " + (int)Character.YPosition + ")\n"
+                + "Camera: (" + (int)Level.X + ", " + (int)Level.Y + ")\n"
+                + "Player Block Position: (" + (int)(Character.XPosition / 16) + ", " + (int)(Character.YPosition / 16) + ")\n"
+                + "Player Within Chunk: (" + (int) ((Character.XPosition / 16) % 16) + ", " + (int) ((Character.YPosition / 16) % 16) + ")\n"
+                + "Player Chunk: (" + (int)((Character.XPosition / 16) / 16) + ", " + (int)((Character.YPosition / 16) / 16) + ")\n"
+                + "Speed: (" + Character.XSpeed + "," + Character.YSpeed + ")\n"
+                + "Speed (SMW Units): (" + (int)(Character.XSpeed * 16.0) + "," + (int)(Character.YSpeed * 16.0) + ")\n"
                 ;
             spriteBatch.DrawString(debugFont, debug, Vector2.Zero, Color.White);
             spriteBatch.End();
@@ -316,7 +333,7 @@ namespace MarioWorldSharp
             base.Draw(gameTime);
         }
 
-        Color[] GetImageData(Color[] colorData, int width, Rectangle rectangle)
+        public Color[] GetImageData(Color[] colorData, int width, Rectangle rectangle)
         {
             Color[] color = new Color[rectangle.Width * rectangle.Height];
             for (int x = 0; x < rectangle.Width; x++)
@@ -329,17 +346,18 @@ namespace MarioWorldSharp
             return color;
         }
 
-        public Texture2D createRectangleTexture(Rectangle rect, Color color)
+        #region Drawing methods
+        public Texture2D CreateRectangleTexture(Rectangle rect, Color color)
         {
-            return createRectangleTexture(rect, color, color);
+            return CreateRectangleTexture(rect, color, color);
         }
 
-        public Texture2D createRectangleTexture(Rectangle rect)
+        public Texture2D CreateRectangleTexture(Rectangle rect)
         {
-            return createRectangleTexture(rect, Color.Black, Color.Black);
+            return CreateRectangleTexture(rect, Color.Black, Color.Black);
         }
 
-        public Texture2D createRectangleTexture(Rectangle rect, Color solid, Color outline)
+        public Texture2D CreateRectangleTexture(Rectangle rect, Color solid, Color outline)
         {
             Color[] colColor = new Color[rect.Width * rect.Height];
             for (int i = 0; i < rect.Width; i++)
@@ -347,15 +365,31 @@ namespace MarioWorldSharp
                 for (int j = 0; j < rect.Height; j++)
                 {
                     if (i == 0 || j == 0 || i == rect.Width - 1 || j == rect.Height - 1)
-                        colColor[(j * rect.Width) + i] = new Color(255, 45, 45, 100);
+                        colColor[(j * rect.Width) + i] = outline;
                     else
-                        colColor[(j * rect.Width) + i] = new Color(64, 0, 0, 100);
+                        colColor[(j * rect.Width) + i] = solid;
                 }
             }
             Texture2D box = new Texture2D(GraphicsDevice, rect.Width, rect.Height);
             box.SetData(colColor);
             return box;
         }
+
+        public Texture2D CreateCrossTexture(Color c)
+        {
+            Color[] colColor = new Color[3 * 3];            //Resolution: 3x3
+            for (int i = 0; i < colColor.Length; i++)
+            {
+                if (i % 2 == 1 || i == 4)
+                    colColor[i] = c;
+                else
+                    colColor[i] = Color.Transparent;
+            }
+            Texture2D t = new Texture2D(GraphicsDevice, 3, 3);
+            t.SetData(colColor);
+            return t;
+        }
+        #endregion
 
         public SpriteBatch GetSpriteBatch()
         {

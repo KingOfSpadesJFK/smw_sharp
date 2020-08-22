@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MarioWorldSharp.Sprite;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -6,10 +7,15 @@ namespace MarioWorldSharp.Block
 {
     public class Ledge : PassThroughBlock
     {
-        public override void Bellow(Player Mario, double x, double y)
+        public override void Bellow(Player p, double x, double y)
         {
-            if (Mario.YSpeed > 0 && y % 16.0 <= 4.0)
-                Blocks.SOLID_BLOCK.Bellow(Mario, x, y);
+            if (p.YSpeed > 0 && y % 16.0 <= 8.0)
+                Blocks.SOLID_BLOCK.Bellow(p, x, y);
+        }
+        public override void Bellow(ISprite p, double x, double y)
+        {
+            if (p.YSpeed > 0 && y % 16.0 <= 8.0)
+                Blocks.SOLID_BLOCK.Bellow(p, x, y);
         }
     }
 }

@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MarioWorldSharp.Sprite;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGame;
+using static MarioWorldSharp.Level;
 
-namespace MarioWorldSharp
+namespace MarioWorldSharp.Sprite
 {
     public enum PowerupEnum
     {
@@ -18,7 +20,7 @@ namespace MarioWorldSharp
         Fire = 3
     }
 
-    public class Player
+    public class Player : ISprite
     {
         private double _xPos;
         private double _yPos;
@@ -55,6 +57,8 @@ namespace MarioWorldSharp
         public int Pose { get; set; }
         public int YDrawDisplacement { get; set; }
         public byte DashTimer { get; set; }
+        public SpriteStatus Status { get; set; }
+        public SpriteData Data { get; set; }
 
         private Rectangle collisionBox;
         private bool facingRight;
@@ -71,6 +75,8 @@ namespace MarioWorldSharp
         public Player() : this(0, 0)
         {}
 
+        private readonly int heightDisp = 0;
+
         public Player(double XPosition, double YPosition)
         {
             facingRight = true;
@@ -78,29 +84,30 @@ namespace MarioWorldSharp
             HorizGravity = 0;
             if (!Powerup.Equals(PowerupEnum.Small))
             {
-                colDisp = 0;
                 YDrawDisplacement = 0;
-                collisionBox = new Rectangle(0, 0, 16, 32);
+                colDisp = heightDisp;
+                collisionBox = new Rectangle(0, 0, 16, 32 - heightDisp);
             }
             else
             {
                 YDrawDisplacement = 10;
-                colDisp = 16;
-                collisionBox = new Rectangle(0, 0, 16, 16);
+                colDisp = 16 + heightDisp;
+                collisionBox = new Rectangle(0, 0, 16, 16 - heightDisp);
             }
             DashTimer = 0;
             Pose = 0;
 
             this.XPosition = XPosition;
             this.YPosition = YPosition;
-            Console.Write("It's a me!");
+            Console.WriteLine("It's a me!");
+            Console.WriteLine(this.GetType());
             Poses = new Texture2D[70];
 
             //Input Events
-            MarioWorld.InputEvent.JumpPressEvent += Jump;
-            MarioWorld.InputEvent.SpinPressEvent += Spinjump;
-            MarioWorld.InputEvent.JumpDownEvent += Jumping;
-            MarioWorld.InputEvent.SpinDownEvent += Jumping;
+            SMW.InputEvent.JumpPressEvent += Jump;
+            SMW.InputEvent.SpinPressEvent += Spinjump;
+            SMW.InputEvent.JumpDownEvent += Jumping;
+            SMW.InputEvent.SpinDownEvent += Jumping;
         }
 
         public Rectangle GetCollisionBox() { return collisionBox; }
@@ -140,8 +147,8 @@ namespace MarioWorldSharp
             }
             else
             {
-                Move();
                 EnvironmentCollision();
+                Move();
                 UpdateXPositionition();
                 UpdateYPositionition();
             }
@@ -160,9 +167,9 @@ namespace MarioWorldSharp
             return Poses[Pose];
         }
 
-
-        public static readonly int VertColisionOffset = 5;
-        public static readonly int HorizCollisionOffset = 3;
+        public static readonly int SideVertColisionOffset = 5;
+        public static readonly int SideHorizCollisionOffset = 3;
+        public static readonly int TopBotHorizCollisionOffset = 8;
         private void EnvironmentCollision()
         {
             BlockedAbove = false;
@@ -171,18 +178,20 @@ namespace MarioWorldSharp
             BlockedRight = false;
 
             //Check left collision
-            MarioWorld.level.GetMap16FromPosition(collisionBox.Left + HorizCollisionOffset, collisionBox.Top + collisionBox.Height / 2).Left(this, collisionBox.Left + HorizCollisionOffset, collisionBox.Top + collisionBox.Height / 2);
+            SMW.Level.GetMap16FromPosition(collisionBox.Left + SideHorizCollisionOffset, collisionBox.Top + TopBotHorizCollisionOffset).Left(this, collisionBox.Left + SideHorizCollisionOffset, collisionBox.Top + TopBotHorizCollisionOffset);
+            SMW.Level.GetMap16FromPosition(collisionBox.Left + SideHorizCollisionOffset, collisionBox.Bottom - TopBotHorizCollisionOffset).Left(this, collisionBox.Left + SideHorizCollisionOffset, collisionBox.Bottom - TopBotHorizCollisionOffset);
 
             //Check right collision
-            MarioWorld.level.GetMap16FromPosition(collisionBox.Right - HorizCollisionOffset, collisionBox.Top + collisionBox.Height / 2).Right(this, collisionBox.Right - HorizCollisionOffset, collisionBox.Top + collisionBox.Height / 2);
+            SMW.Level.GetMap16FromPosition(collisionBox.Right - SideHorizCollisionOffset, collisionBox.Top + TopBotHorizCollisionOffset).Right(this, collisionBox.Right - SideHorizCollisionOffset, collisionBox.Top + TopBotHorizCollisionOffset);
+            SMW.Level.GetMap16FromPosition(collisionBox.Right - SideHorizCollisionOffset, collisionBox.Bottom - TopBotHorizCollisionOffset).Right(this, collisionBox.Right - SideHorizCollisionOffset, collisionBox.Bottom - TopBotHorizCollisionOffset);
 
             //Check bottom collision
-            MarioWorld.level.GetMap16FromPosition(collisionBox.Left + VertColisionOffset, collisionBox.Bottom).Bellow(this, collisionBox.Left + VertColisionOffset, collisionBox.Bottom);
-            MarioWorld.level.GetMap16FromPosition(collisionBox.Right - VertColisionOffset, collisionBox.Bottom).Bellow(this, collisionBox.Right - VertColisionOffset, collisionBox.Bottom);
+            SMW.Level.GetMap16FromPosition(collisionBox.Left + SideVertColisionOffset, collisionBox.Bottom).Bellow(this, collisionBox.Left + SideVertColisionOffset, collisionBox.Bottom);
+            SMW.Level.GetMap16FromPosition(collisionBox.Right - SideVertColisionOffset, collisionBox.Bottom).Bellow(this, collisionBox.Right - SideVertColisionOffset, collisionBox.Bottom);
 
             //Check top collision
-            MarioWorld.level.GetMap16FromPosition(collisionBox.Left + VertColisionOffset, collisionBox.Top).Above(this, collisionBox.Left + VertColisionOffset, collisionBox.Top);
-            MarioWorld.level.GetMap16FromPosition(collisionBox.Right - VertColisionOffset, collisionBox.Top).Above(this, collisionBox.Right - VertColisionOffset, collisionBox.Top);
+            SMW.Level.GetMap16FromPosition(collisionBox.Left + SideVertColisionOffset, collisionBox.Top).Above(this, collisionBox.Left + SideVertColisionOffset, collisionBox.Top);
+            SMW.Level.GetMap16FromPosition(collisionBox.Right - SideVertColisionOffset, collisionBox.Top).Above(this, collisionBox.Right - SideVertColisionOffset, collisionBox.Top);
         }
 
         private void UpdateXPositionition()
@@ -204,7 +213,9 @@ namespace MarioWorldSharp
         {
             if (!jumped && BlockedBellow)
             {
-                YSpeed = (-80.0 - ((640.0 * Math.Abs(XSpeed * 2.0)) / 256.0)) / 16.0;
+                //SMW Jump Velocity formula
+                //BaseJumpVelocity - (640 * |XSpeed * 16 / 4| / 256)
+                YSpeed = (-80.0 - (640.0 * Math.Abs(XSpeed * 1.5) / 256.0)) / 16.0;
             }
         }
 
@@ -236,9 +247,9 @@ namespace MarioWorldSharp
 
         private void Move()
         {
-            double acceleration = 0.09375;
-            double decceleration = .3125;
             //SMW velocity to double: v / 16.0
+            double acceleration = 1.5 / 16.0;
+            double decceleration = 640.0 / 256.0 / 16.0;
             double maxXSpeed = 20.0 / 16.0;
 
             if (BlockedBellow && Input.Down.IsKeyHeld())
@@ -250,8 +261,8 @@ namespace MarioWorldSharp
 
             if (Input.Dash.IsKeyHeld())
             {
-                decceleration = .3125;
-                acceleration = 0.09375;
+                acceleration = 1.5 / 16.0;
+                decceleration = 1280.0 / 256.0 / 16.0;
                 if (DashTimer >= 112)
                     maxXSpeed = 48.0 / 16.0;
                 else
@@ -340,8 +351,20 @@ namespace MarioWorldSharp
 
             if (XSpeed == 0 && !moving && BlockedBellow && Input.Up.IsKeyHeld())
                 Pose = 0x03;
+
             if (ducking)
                 Pose = 0x3C;
+
+            if (!ducking && Powerup != PowerupEnum.Small)
+            {
+                colDisp = 0 + heightDisp;
+                collisionBox.Height = 32;
+            }
+            else
+            {
+                colDisp = 16 + heightDisp;
+                collisionBox.Height = 16;
+            }
 
             moving = (Input.Left.IsKeyHeld() || Input.Right.IsKeyHeld()) && !ducking;
             bool notTwoHDir = !(Input.Left.IsKeyHeld() && Input.Right.IsKeyHeld());
@@ -384,22 +407,23 @@ namespace MarioWorldSharp
             #endregion
             else
             {
+                decceleration = 1.0 / 16.0;
                 # region Friction (Decceleration only on ground)
                 if (BlockedBellow)
                 {
                     if (!moving && XSpeed > 0)
                     {
-                        if (XSpeed - .125 <= 0)
+                        if (XSpeed - decceleration <= 0)
                             XSpeed = 0;
                         else
-                            XSpeed -= .125;
+                            XSpeed -= decceleration;
                     }
                     else if (!moving && XSpeed < 0)
                     {
-                        if (XSpeed + .125 >= 0)
+                        if (XSpeed + decceleration >= 0)
                             XSpeed = 0;
                         else
-                            XSpeed += .125;
+                            XSpeed += decceleration;
                     }
                 }
                 #endregion
@@ -415,6 +439,14 @@ namespace MarioWorldSharp
                         XSpeed -= .125;
                 }
             }
+        }
+
+        public void Draw(SpriteBatch spriteBatch)
+        {
+            spriteBatch.Draw(GetTexture(),
+                new Rectangle((int)XPosition - (int)SMW.Level.X, (int)YPosition + YDrawDisplacement - (int)SMW.Level.Y, GetTexture().Width, GetTexture().Height),
+                new Rectangle(0, 0, GetTexture().Width, GetTexture().Height),
+                Color.White, 0.0F, Vector2.Zero, GetSpriteEffect(), 1F);
         }
     }
 }

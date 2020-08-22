@@ -3,6 +3,9 @@
 MarioWorldSharp/bin
 MarioWorldSharp/obj
 
+#SMW
+outerworkspace/snes
+
 # ROM Files
 *.smc
 *.sfc
