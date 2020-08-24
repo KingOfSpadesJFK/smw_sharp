@@ -18,6 +18,8 @@ namespace MarioWorldSharp
         public event EventHandler LeftPressEvent;
         public event EventHandler RightPressEvent;
         public event EventHandler DEBUG_ShowHitboxEvent;
+        public event EventHandler DEBUG_PrintSpriteTreeEvent;
+        public event EventHandler DEBUG_KillAllSpritesEvent;
         public void Process()
         {
             if (Input.Jump.IsKeyPressed())
@@ -32,6 +34,10 @@ namespace MarioWorldSharp
 
             if (Input.ShowHitboxes.IsKeyPressed())
                 DEBUG_ShowHitboxEvent.Invoke(this, EventArgs.Empty);
+            if (Input.DEBUG_PrintSpriteTree.IsKeyPressed())
+                DEBUG_PrintSpriteTreeEvent.Invoke(this, EventArgs.Empty);
+            if (Input.DEBUG_KillAllSprites.IsKeyPressed())
+                DEBUG_KillAllSpritesEvent.Invoke(this, EventArgs.Empty);
         }
     }
     public class Input
@@ -40,13 +46,6 @@ namespace MarioWorldSharp
         public IInputWrapper[] Inputs { get; set; }
 
         private bool isHeld;
-
-        public Input(string n, params IInputWrapper[] kArr)
-        {
-            Name = n;
-            Inputs = kArr;
-            isHeld = false;
-        }
 
         public bool IsKeyHeld()
         {
@@ -77,36 +76,100 @@ namespace MarioWorldSharp
             return Name;
         }
 
-        public static Input Jump = new Input("Jump", 
-            new KeyWrapper(Keys.Z),
-            new ButtonWrapper(Buttons.A));
-        public static Input Spinjump = new Input("Spinump", 
-            new KeyWrapper(Keys.X),
-            new ButtonWrapper(Buttons.B));
-        public static Input Dash = new Input("Dash", 
-            new KeyWrapper(Keys.A), 
-            new KeyWrapper(Keys.S),
-            new ButtonWrapper(Buttons.X),
-            new ButtonWrapper(Buttons.Y));
-        public static Input Up = new Input("Up",
-            new KeyWrapper(Keys.Up),
-            new ButtonWrapper(Buttons.LeftThumbstickUp),
-            new ButtonWrapper(Buttons.DPadUp));
-        public static Input Down = new Input("Down",
-            new KeyWrapper(Keys.Down),
-            new ButtonWrapper(Buttons.LeftThumbstickDown),
-            new ButtonWrapper(Buttons.DPadDown));
-        public static Input Left = new Input("Left",
-            new KeyWrapper(Keys.Left),
-            new ButtonWrapper(Buttons.LeftThumbstickLeft),
-            new ButtonWrapper(Buttons.DPadLeft));
-        public static Input Right = new Input("Right",
-            new KeyWrapper(Keys.Right),
-            new ButtonWrapper(Buttons.LeftThumbstickRight),
-            new ButtonWrapper(Buttons.DPadRight));
+        public static Input Jump = new Input
+        {
+            Name = "Jump",
+            Inputs = new IInputWrapper[]
+            {
+                new KeyWrapper(Keys.Z),
+                new ButtonWrapper(Buttons.A)
+            }
+        };
+        public static Input Spinjump = new Input
+        {
+            Name = "Spinjump",
+            Inputs = new IInputWrapper[]
+            {
+                new KeyWrapper(Keys.X),
+                new ButtonWrapper(Buttons.B)
+            }
+        };
+        public static Input Dash = new Input
+        {
+            Name = "Dash",
+            Inputs = new IInputWrapper[]
+            {
+                new KeyWrapper(Keys.A),
+                new KeyWrapper(Keys.S),
+                new ButtonWrapper(Buttons.X),
+                new ButtonWrapper(Buttons.Y)
+            }
+        };
+        public static Input Up = new Input
+        {
+            Name = "Up",
+            Inputs = new IInputWrapper[]
+            {
+                new KeyWrapper(Keys.Up),
+                new ButtonWrapper(Buttons.LeftThumbstickUp),
+                new ButtonWrapper(Buttons.DPadUp)
+            }
+        };
+        public static Input Down = new Input
+        {
+            Name = "Down",
+            Inputs = new IInputWrapper[]
+            {
+                new KeyWrapper(Keys.Down),
+                new ButtonWrapper(Buttons.LeftThumbstickDown),
+                new ButtonWrapper(Buttons.DPadDown)
+            }
+        };
+        public static Input Left = new Input
+        {
+            Name = "Left",
+            Inputs = new IInputWrapper[]
+            {
+                new KeyWrapper(Keys.Left),
+                new ButtonWrapper(Buttons.LeftThumbstickLeft),
+                new ButtonWrapper(Buttons.DPadLeft)
+            }
+        };
+        public static Input Right = new Input
+        {
+            Name = "Right",
+            Inputs = new IInputWrapper[]
+            {
+                new KeyWrapper(Keys.Right),
+                new ButtonWrapper(Buttons.LeftThumbstickRight),
+                new ButtonWrapper(Buttons.DPadRight)
+            }
+        };
 
-        public static Input ShowHitboxes = new Input("ShowHitboxes",
-            new KeyWrapper(Keys.G));
+        public static Input ShowHitboxes = new Input
+        {
+            Name = "ShowHitboxes",
+            Inputs = new IInputWrapper[]
+            {
+                new KeyWrapper(Keys.G)
+            }
+        };
+        public static Input DEBUG_PrintSpriteTree = new Input
+        {
+            Name = "DEBUG_PrintSpriteTree",
+            Inputs = new IInputWrapper[]
+            {
+                new KeyWrapper(Keys.H)
+            }
+        };
+        public static Input DEBUG_KillAllSprites = new Input
+        {
+            Name = "DEBUG_KillAllSprites",
+            Inputs = new IInputWrapper[]
+            {
+                new KeyWrapper(Keys.K)
+            }
+        };
 
     }
 

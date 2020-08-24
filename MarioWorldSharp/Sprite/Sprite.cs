@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
@@ -34,6 +35,7 @@ namespace MarioWorldSharp.Sprite
         public double YPosition { get; set; }
         public double XSpeed { get; set; }
         public double YSpeed { get; set; }
+        public double FacingAngle { get; set; }
         public byte VertGravity { get; set; }
         public byte HorizGravity { get; set; }
         public bool BlockedBellow { get; set; }
@@ -45,20 +47,34 @@ namespace MarioWorldSharp.Sprite
         public void Process();
         public void Draw(SpriteBatch spriteBatch);
         public Rectangle GetCollisionBox();
+        public void Kill();
     }
 
+    /// <summary>
+    /// A class containing the properties of a sprite, but not the sprite itself.
+    /// This should be used when generating a sprite.
+    /// </summary>
     public class SpriteData
     {
         public SpriteID ID;
-        public int Index;
-        public bool Spawned;
-        public bool DisposeOffscreen;
+        public object[] Args;
+        public bool DisposeOffscreen = true;
         public int DespawnThresh = 16;
+        public int Index = -1;
+        public bool Spawned = false;
+        public bool InteractWithSprites = true;
+        public bool CollideTurnaround = true;
+
+        public override string ToString()
+        {
+            return $"{ID.ToString()}, #{Index}";
+        }
     }
     public abstract class Sprite : IDisposable, ISprite
     {
         private double _xPos;
         private double _yPos;
+        private double _angle;
         protected Rectangle collisionBox;
         public double XPosition
         {
@@ -82,6 +98,14 @@ namespace MarioWorldSharp.Sprite
         }
         public double XSpeed { get; set; }
         public double YSpeed { get; set; }
+        public double FacingAngle
+        {
+            get => _angle;
+            set
+            {
+                _angle = value % 360.0;
+            }
+        }
         public byte VertGravity { get; set; }
         public byte HorizGravity { get; set; }
         public bool BlockedBellow { get; set; }
@@ -114,14 +138,22 @@ namespace MarioWorldSharp.Sprite
             return collisionBox;
         }
 
+        public virtual void Kill()
+        {
+            if (Data.Index != -1)
+                SMW.Level.RemoveSprite(Data);
+            this.Dispose();
+        }
+
+        public virtual void Draw(SpriteBatch spriteBatch) { }
+
+        #region Various Methods
         protected virtual void UpdateXPosition()
         {
             double gravity = HorizGravity * .375;
             if (XSpeed < 64.0 / 16.0)
                 XSpeed += gravity;
             XPosition += XSpeed;
-            if (XSpeed != 0.0)
-                SpriteHandler.UpdateSpriteTree(this, false);
         }
 
         protected virtual void UpdateYPosition()
@@ -130,24 +162,6 @@ namespace MarioWorldSharp.Sprite
             if (YSpeed < 64.0 / 16.0)
                 YSpeed += gravity;
             YPosition += YSpeed;
-            if (YSpeed != 0.0)
-                SpriteHandler.UpdateSpriteTree(this, false);
-        }
-
-        protected virtual void UpdateXYPosition()
-        {
-            double gravity = HorizGravity * .375;
-            if (XSpeed < 64.0 / 16.0)
-                XSpeed += gravity;
-            XPosition += XSpeed;
-
-            gravity = VertGravity * .375;
-            if (YSpeed < 64.0 / 16.0)
-                YSpeed += gravity;
-            YPosition += YSpeed;
-
-            if (YSpeed != 0.0 || XSpeed != 0.0)
-                SpriteHandler.UpdateSpriteTree(this, false);
         }
 
         private static readonly int SideVertColisionOffset = 5;
@@ -181,9 +195,88 @@ namespace MarioWorldSharp.Sprite
         {
             //TODO: Implement
         }
+
         protected virtual void SpriteCollision()
         {
             //TODO: Implement
+        }
+
+        protected bool IsCollidingWithSprites(out ISprite[] nearestNeighbors)
+        {
+            nearestNeighbors = SpriteHandler.GetNearestNeighbors(new[] { XPosition, YPosition }, 10);
+            foreach(ISprite s in nearestNeighbors)
+            {
+                if (IsCollidingWithSprite(s))
+                    return true;
+            }
+
+            return false;
+        }
+
+        protected bool IsCollidingWithSprite(ISprite s, out SpriteCollisionSide coll)
+        {
+            coll = 0;
+            //Ignore if s is this sprite
+            if (Object.ReferenceEquals(this, s))
+                return false;
+
+            //Top = 0
+            if (s.GetCollisionBox().Contains(this.collisionBox.Left + this.collisionBox.Width / 2.0F, this.collisionBox.Top))
+            { coll = SpriteCollisionSide.Top; return true; }
+            //Bottom = 1
+            if (s.GetCollisionBox().Contains(this.collisionBox.Left + this.collisionBox.Width / 2.0F, this.collisionBox.Bottom))
+            { coll = SpriteCollisionSide.Bottom; return true; }
+
+            //Left = 2
+            if (s.GetCollisionBox().Contains(this.collisionBox.Left, this.collisionBox.Top + this.collisionBox.Height / 2.0F))
+            { coll = SpriteCollisionSide.Left; return true; }
+            //Right = 3
+            if (s.GetCollisionBox().Contains(this.collisionBox.Right, this.collisionBox.Top + this.collisionBox.Height / 2.0F))
+            { coll = SpriteCollisionSide.Right; return true; }
+
+            return false;
+        }
+
+        public enum SpriteCollisionSide : byte
+        {
+            Top, Bottom, Left, Right
+        }
+
+        protected bool IsCollidingWithSprite(ISprite s)
+        {
+            return IsCollidingWithSprite(s, out _);
+        }
+
+        protected ISprite[] GetCollidedSprites()
+        {
+            ISprite[] sprites = new ISprite[5];
+
+            ISprite[] nearestNeighbors = SpriteHandler.GetNearestNeighbors(new[] { XPosition, YPosition }, 10);
+            foreach (ISprite s in nearestNeighbors)
+            {
+                //Ignore if s is this sprite
+                if (Object.ReferenceEquals(this, s))
+                    continue;
+
+                if (s.GetCollisionBox().Contains(this.collisionBox.Left + this.collisionBox.Width / 2.0F, this.collisionBox.Top))
+                    sprites[0] = s;
+                if (s.GetCollisionBox().Contains(this.collisionBox.Left + this.collisionBox.Width / 2.0F, this.collisionBox.Bottom))
+                    sprites[1] = s;
+
+                if (s.GetCollisionBox().Contains(this.collisionBox.Left, this.collisionBox.Top + this.collisionBox.Height / 2.0F))
+                    sprites[2] = s;
+                if (s.GetCollisionBox().Contains(this.collisionBox.Right, this.collisionBox.Top + this.collisionBox.Height / 2.0F))
+                    sprites[3] = s;
+
+                if (s.GetCollisionBox().Contains(this.collisionBox))
+                    sprites[4] = s;
+            }
+            return sprites;
+        }
+
+        protected virtual void OffScreen()
+        {
+            OffScreen(Data.DespawnThresh, Data.DisposeOffscreen);
         }
 
         protected bool[] OffScreen(double borderSize, bool dispose)
@@ -206,18 +299,10 @@ namespace MarioWorldSharp.Sprite
 
             return off;
         }
-        protected virtual void Kill()
-        {
-            SMW.Level.RemoveSprite(Data);
-            this.Dispose();
-        }
-        public virtual void Draw(SpriteBatch spriteBatch)
-        {
-            
-        }
+        #endregion
 
         #region IDisposable Support
-        private bool disposedValue = false; // To detect redundant calls
+        protected bool disposedValue = false; // To detect redundant calls
 
         protected virtual void Dispose(bool disposing)
         {
@@ -226,11 +311,10 @@ namespace MarioWorldSharp.Sprite
                 if (disposing)
                 {
                     // TODO: dispose managed state (managed objects).
-                    if (Status != SpriteStatus.NonExistent)
+                    if (this.Status != SpriteStatus.NonExistent)
                     {
-                        Status = SpriteStatus.NonExistent;
-                        SMW.Level.HideSprite(Data);
-                        SpriteHandler.UpdateSpriteTree(this, true);
+                        this.Status = SpriteStatus.NonExistent;
+                        this.Data.Spawned = false;
                     }
                 }
 
@@ -258,5 +342,122 @@ namespace MarioWorldSharp.Sprite
 
         #endregion
 
+        public override string ToString()
+        {
+            return $"{Data}";
+        }
+
+    }
+    public class TestSprite : Sprite
+    {
+        private Texture2D Box;
+        private readonly Random rand = new Random();
+        private double speed;
+        private bool facingLeft;
+
+        public TestSprite(double x, double y, SpriteData d) : base(x, y, d)
+        {
+            if (this.disposedValue)
+                return;
+            this.collisionBox = new Rectangle((int)x, (int)y, 16, 16);
+            if (this.XPosition % 64 == 0 && d.Index != -1)
+            {
+                SpriteSpawner.SpawnSprite(this.XPosition, this.YPosition, new SpriteData { ID = SpriteID.GreenShellessKoopa }).YSpeed = -80.0 / 16.0;
+            }
+
+            speed = 2.0 + rand.NextDouble() * 2.0;
+            facingLeft = SMW.Character.XPosition < this.XPosition;
+        }
+
+        public override void Process()
+        {
+            Float();
+            UpdateYPosition();
+            UpdateXPosition();
+            OffScreen();
+        }
+
+        private void Bounce()
+        {
+            this.VertGravity = 1;
+            if (this.BlockedBellow)
+            {
+                this.YSpeed = rand.NextDouble();
+                this.YSpeed *= this.YSpeed * -2.5;
+                this.YSpeed -= 6.0;
+                facingLeft = SMW.Character.XPosition < this.XPosition;
+            }
+
+            if (facingLeft)
+                this.XSpeed = speed * -1.0;
+            else
+                this.XSpeed = speed * 1.0;
+
+            EnvironmentCollision();
+        }
+
+        private void Float()
+        {
+            Player p = SMW.Character;
+            this.VertGravity = 0;
+            double[] dis = new[]
+            {
+                p.XPosition - this.XPosition,
+                p.YPosition - this.YPosition,
+                0.0
+            };
+
+            if (dis[0] < 0)
+                this.XSpeed = Math.Clamp(this.XSpeed - (2.0 / 16.0), -speed, speed);
+            else 
+                this.XSpeed = Math.Clamp(this.XSpeed + (2.0 / 16.0), -speed, speed);
+
+            if (dis[1] < 0)
+                this.YSpeed = Math.Clamp(this.YSpeed - (2.0 / 16.0), -speed, speed);
+            else
+                this.YSpeed = Math.Clamp(this.YSpeed + (2.0 / 16.0), -speed, speed);
+        }
+
+        protected override void EnvironmentCollision()
+        {
+            base.EnvironmentCollision();
+
+            if (BlockedLeft)
+                facingLeft = false;
+            if (BlockedRight)
+                facingLeft = true;
+        }
+
+        public override void Draw(SpriteBatch spriteBatch)
+        {
+            if (this.Box == null)
+            {
+                Rectangle rect = new Rectangle((int)(SMW.Level.X - this.XPosition), (int)(SMW.Level.Y - this.YPosition), 16, 16);
+                Color[] colColor = new Color[rect.Width * rect.Height];
+                for (int i = 0; i < rect.Width; i++)
+                {
+                    for (int j = 0; j < rect.Height; j++)
+                    {
+                        if (i == 0 || j == 0 || i == rect.Width - 1 || j == rect.Height - 1)
+                            colColor[(j * rect.Width) + i] = new Color(225, 225, 225, 100);
+                        else
+                            colColor[(j * rect.Width) + i] = new Color(64, 64, 64, 100);
+                    }
+                }
+                this.Box = new Texture2D(spriteBatch.GraphicsDevice, rect.Width, rect.Height);
+                this.Box.SetData(colColor);
+            }
+
+            spriteBatch.Draw(Box,
+                new Rectangle((int)XPosition - (int)SMW.Level.X, (int)YPosition - (int)SMW.Level.Y, Box.Width, Box.Height),
+                new Rectangle(0, 0, Box.Width, Box.Height),
+                Color.White, 0.0F, Vector2.Zero, SpriteEffects.None, 1F);
+        }
+
+        public new void Dispose()
+        {
+            this.Box.Dispose();
+            base.Dispose();
+        }
     }
 }

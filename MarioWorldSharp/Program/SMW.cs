@@ -57,6 +57,17 @@ namespace MarioWorldSharp
             colorDisp = new Color();
 
             InputEvent.DEBUG_ShowHitboxEvent += ShowHitbox;
+            InputEvent.DEBUG_PrintSpriteTreeEvent += PrintSpriteTree;
+            InputEvent.DEBUG_KillAllSpritesEvent += SpriteHandler.KillSprites;
+        }
+
+        private void PrintSpriteTree(object sender, EventArgs e)
+        {
+            Console.WriteLine($"Sprite Tree: \n {SpriteHandler.GetSpriteTree()}");
+
+            Console.WriteLine("Sprite List:");
+            foreach (ISprite s in SpriteHandler.SpriteList)
+                Console.WriteLine($"    ({s})");
         }
 
         /// <summary>
@@ -68,9 +79,10 @@ namespace MarioWorldSharp
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            Level = new Level();
             Character = new Player();
+            Level = new Level();
             Level.SpawnSprites();
+            Console.WriteLine(SpriteHandler.GetSpriteTree());
             gamescreen = new RenderTarget2D(graphics.GraphicsDevice, ResWidth, ResHeight, false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
             base.Initialize();
         }
@@ -159,6 +171,8 @@ namespace MarioWorldSharp
             InputEvent.Process();
             LevelGameMode();
             base.Update(gameTime);
+
+            FrameTimer++;
         }
 
         private void ShowHitbox(object sender, EventArgs e)
@@ -171,6 +185,24 @@ namespace MarioWorldSharp
             Character.Process();
             SpriteHandler.ProcessSprites();
             Level.Scroll(Character.XPosition, Character.YPosition);
+        }
+
+        public static bool SecondPassed { get => FrameTimer % 60L == 0; }
+        public static long FrameTimer { get; set; }
+
+        private static double fpsTotal = 0;
+        private static double fps = 0;
+        private static int fpsAvgCount = 0;
+        private int FPS(GameTime gameTime)
+        {
+            fpsTotal += (1000.0 / gameTime.ElapsedGameTime.TotalMilliseconds);
+            fpsAvgCount++;
+            if (FrameTimer % 30L == 0)
+            { fps = fpsTotal / fpsAvgCount; fpsAvgCount = 0;  fpsTotal = 0; }
+
+            if (fps % 1.0 > 0.5)
+                return (int)fps + 1;
+            return (int)fps;
         }
 
         /// <summary>
@@ -264,13 +296,12 @@ namespace MarioWorldSharp
                 layer = layer.GetNextLayer();
             }
 
+            //Draw Sprites
+            foreach (ISprite s in SpriteHandler.SpriteList)
+                s?.Draw(spriteBatch);
+
             //Draw player
             Character.Draw(spriteBatch);
-
-            //Draw Sprites
-            ISprite[] sprites = SpriteHandler.ToArray();
-            foreach (ISprite s in sprites)
-                s?.Draw(spriteBatch);
 
             if (drawCollision)
             {
@@ -317,7 +348,7 @@ namespace MarioWorldSharp
 
             spriteBatch.Begin();
             string debug = graphics.PreferredBackBufferWidth + "x" + graphics.PreferredBackBufferHeight + "\nScale: " + scale + ", True Scale: " + trueScale + "\n"
-                + $"{(int)(1.0 / gameTime.ElapsedGameTime.TotalSeconds)}FPS \n"
+                + $"{FPS(gameTime)}FPS \n"
                 + "Player: (" + Character.XPosition + ", " + Character.YPosition + ")\n"
                 + "Player (Integral): (" + (int)Character.XPosition + ", " + (int)Character.YPosition + ")\n"
                 + "Camera: (" + (int)Level.X + ", " + (int)Level.Y + ")\n"
@@ -326,7 +357,11 @@ namespace MarioWorldSharp
                 + "Player Chunk: (" + (int)((Character.XPosition / 16) / 16) + ", " + (int)((Character.YPosition / 16) / 16) + ")\n"
                 + "Speed: (" + Character.XSpeed + "," + Character.YSpeed + ")\n"
                 + "Speed (SMW Units): (" + (int)(Character.XSpeed * 16.0) + "," + (int)(Character.YSpeed * 16.0) + ")\n"
-                ;
+                + $"Called UpdateCollisionTree() {SpriteHandler.UpdateCalls} {(SpriteHandler.UpdateCalls == 1 ? "time" : "times")} this past second\n"
+                + $"Sprites in level: {Level.SpriteCount}\n"
+                + $"Sprites on screen: {SpriteHandler.SpriteCount}\n";
+            debug += SpriteHandler.SpriteLastSpawned != null ? $"Last sprite spawned: ({SpriteHandler.SpriteLastSpawned})\n" : "";
+            debug += SpriteHandler.SpriteLastDepawned != null ? $"Last sprite disposed: ({SpriteHandler.SpriteLastDepawned})\n" : "";
             spriteBatch.DrawString(debugFont, debug, Vector2.Zero, Color.White);
             spriteBatch.End();
 

@@ -22,9 +22,9 @@ namespace MarioWorldSharp.Block
             if (p.YSpeed < 0)
             {
                 p.YSpeed = 0;
+                p.BlockedAbove = true;
+                p.YPosition = p.YPosition + 16.0 - (p.YPosition % 16.0);
             }
-            p.BlockedAbove = true;
-            p.YPosition = p.YPosition + 16.0 - (p.YPosition % 16.0);
         }
 
         public override void Above(ISprite s, double x, double y)
@@ -35,9 +35,9 @@ namespace MarioWorldSharp.Block
             if (s.YSpeed < 0)
             {
                 s.YSpeed = 0;
+                s.BlockedAbove = true;
+                s.YPosition = s.YPosition + 16.0 - (s.YPosition % 16.0);
             }
-            s.BlockedAbove = true;
-            s.YPosition = s.YPosition + 16.0 - (s.YPosition % 16.0);
         }
 
         public override void Bellow(Player p, double x, double y)
@@ -48,9 +48,9 @@ namespace MarioWorldSharp.Block
             if (p.YSpeed > 0)
             {
                 p.YSpeed = 0;
+                p.BlockedBellow = true;
+                p.YPosition -= (p.YPosition % 16.0);
             }
-            p.BlockedBellow = true;
-            p.YPosition = p.YPosition - (p.YPosition % 16.0);
         }
 
         public override void Bellow(ISprite s, double x, double y)
@@ -61,9 +61,9 @@ namespace MarioWorldSharp.Block
             if (s.YSpeed > 0)
             {
                 s.YSpeed = 0;
+                s.BlockedBellow = true;
+                s.YPosition -= (s.YPosition % 16.0);
             }
-            s.BlockedBellow = true;
-            s.YPosition = s.YPosition - (s.YPosition % 16.0);
         }
 
         public override void Left(Player p, double x, double y)
@@ -74,9 +74,9 @@ namespace MarioWorldSharp.Block
             if (p.XSpeed < 0)
             {
                 p.XSpeed = 0;
+                p.BlockedLeft = true;
+                p.XPosition = p.XPosition + 16.0 - (p.XPosition % 16.0) - Player.SideHorizCollisionOffset;
             }
-            p.BlockedLeft = true;
-            p.XPosition = p.XPosition + 16.0 - (p.XPosition % 16.0) - Player.SideHorizCollisionOffset;
         }
 
         public override void Left(ISprite s, double x, double y)
@@ -87,9 +87,9 @@ namespace MarioWorldSharp.Block
             if (s.XSpeed < 0)
             {
                 s.XSpeed = 0;
+                s.BlockedLeft = true;
+                s.XPosition = s.XPosition + 16.0 - (s.XPosition % 16.0);
             }
-            s.BlockedLeft = true;
-            s.XPosition = s.XPosition + 16.0 - (s.XPosition % 16.0);
         }
 
         public override void Right(Player p, double x, double y)
@@ -100,9 +100,9 @@ namespace MarioWorldSharp.Block
             if (p.XSpeed > 0)
             {
                 p.XSpeed = 0;
+                p.BlockedRight = true;
+                p.XPosition = p.XPosition - (p.XPosition % 16.0) + Player.SideHorizCollisionOffset;
             }
-            p.BlockedRight = true;
-            p.XPosition = p.XPosition - (p.XPosition % 16.0) + Player.SideHorizCollisionOffset;
         }
 
         public override void Right(ISprite s, double x, double y)
@@ -113,9 +113,9 @@ namespace MarioWorldSharp.Block
             if (s.XSpeed > 0)
             {
                 s.XSpeed = 0;
+                s.BlockedRight = true;
+                s.XPosition -= (s.XPosition % 16.0);
             }
-            s.BlockedRight = true;
-            s.XPosition = s.XPosition - (s.XPosition % 16.0);
         }
     }
 

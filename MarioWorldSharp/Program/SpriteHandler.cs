@@ -15,36 +15,53 @@ namespace MarioWorldSharp.Sprite
     public class SpriteHandler
     {
         private static KdTree<double, ISprite> SpritesTree = new KdTree<double, ISprite>(2, new DoubleMath());
+        public static List<ISprite> SpriteList { get; set; }
+        public static ISprite SpriteLastSpawned { get; set; }
+        public static ISprite SpriteLastDepawned { get; set; }
+        public static int UpdateCalls
+        {
+            get
+            {
+                if (!SMW.SecondPassed)
+                    return _Updated2;
+
+                _Updated2 = _Updated;
+                return _Updated;
+            }
+        }
+        public static int SpriteCount { get => Count; }
+
         private static int Count;
+        private static int _Updated;
+        private static int _Updated2;
 
         public static void ProcessSprites()
         {
+            if (SMW.SecondPassed)
+                _Updated = 0;
             SMW.Level.SpawnSpritesOnScroll();
-            foreach (ISprite s in ToArray())
-                s?.Process();
+            foreach (ISprite s in SpriteList.ToArray())
+            {
+                if (s != null)
+                {
+                    double[] oldPos = new double[] { s.XPosition, s.YPosition };
+                    s.Process();
+                    if ((s.Data.InteractWithSprites) &&
+                        (s.XPosition != oldPos[0] || s.YPosition != oldPos[1] || s.Status == SpriteStatus.NonExistent))
+                    { UpdateCollisionTree(s, oldPos, s.Status == SpriteStatus.NonExistent); _Updated++; }
+                    else if (s.Status == SpriteStatus.NonExistent)
+                    { Count--; SpriteList.Remove(s); SpriteLastDepawned = s; }
+                }
+            }
         }
-
+        /// <summary>
+        /// Returns the collision KdTree of the sprites on-screen. 
+        /// Useful for searching for on-screen sprites by distance from each other
+        /// </summary>
+        /// <returns></returns>
         public static KdTree<double, ISprite> GetSpriteTree()
         {
             return SpritesTree;
-        }
-
-        public static ISprite[] ToArray()
-        {
-            if (Count < 0)
-                return new ISprite[] { null };
-            ISprite[] sprites = new ISprite[Count];
-
-            int i = 0;
-            foreach (KdTreeNode<double, ISprite> n in SpritesTree)
-            {
-                if (i >= Count)
-                    break;
-
-                sprites[i] = n.Value;
-                i++;
-            }
-            return sprites;
         }
 
         public static ISprite[] GetNearestNeighbors(double[] point, int count)
@@ -65,7 +82,7 @@ namespace MarioWorldSharp.Sprite
         }
 
         /// <summary>
-        /// Update all the sprites in the sprite tree
+        /// Update all the sprites in the collision tree
         /// </summary>
         public static void UpdateSpriteTree()
         {
@@ -75,49 +92,85 @@ namespace MarioWorldSharp.Sprite
 
             foreach (KdTreeNode<double, ISprite> s in Sprites)
                 SpritesTree.Add(new[] { s.Value.XPosition, s.Value.XPosition }, s.Value);
-            try
-            {
-                SpritesTree.Balance();
-            } 
-            catch (Exception e)
-            {
 
-            }
+            if (Count != 0)
+                SpritesTree.Balance();
+        }
+
+        public static void KillSprites(object sender, EventArgs e)
+        {
+            foreach (ISprite s in SpriteList.ToArray())
+                s.Kill();
+        }
+
+        private static void UpdateCollisionTree(ISprite s, double[] oldPos, bool remove)
+        {
+            SpritesTree.RemoveSpecific(oldPos, s);
+
+            if (!remove)
+            { SpritesTree.Add(new[] { s.XPosition, s.YPosition }, s); }
+            else
+            { Count--; SpriteList.Remove(s); SpriteLastDepawned = s; }
+
+            //if (Count != 0)
+                //SpritesTree.Balance();
         }
 
         /// <summary>
-        /// Updates a sprite's position in the sprite tree
+        /// Adds the sprite to the processing list
         /// </summary>
-        /// <param name="s">Sprite that should be updated</param>
-        /// <param name="remove">Set to true if you want to remove s from the sprite tree</param>
-        public static void UpdateSpriteTree(ISprite s, bool remove)
-        {
-            double[] oldPos = SpritesTree.FindValue(s);
-            if (oldPos != null)
-                SpritesTree.RemoveAt(oldPos);
-
-            if (!remove)
-                SpritesTree.Add(new[] { s.XPosition, s.YPosition }, s);
-            else
-                Count--;
-
-            try
-            {
-                SpritesTree.Balance();
-            }
-            catch (Exception e)
-            {
-
-            }
-        }
-
+        /// <param name="sprites"></param>
         public static void AddSprites(params ISprite[] sprites)
         {
             foreach (ISprite s in sprites)
             {
-                UpdateSpriteTree(s, false);
+                if (SpriteList == null)
+                    SpriteList = new List<ISprite>();
+                if (s.Data.InteractWithSprites)
+                    SpritesTree.Add(new[] { s.XPosition, s.YPosition }, s);
+                SpriteList.Add(s);
                 Count++;
+                SpriteLastSpawned = s;
             }
+        }
+    }
+
+    public enum SpriteID
+    {
+        GreenShellessKoopa,
+        Test
+    }
+    public class SpriteSpawner
+    {
+        public static ISprite SpawnSprite(double[] point, SpriteData d, params object[] args)
+        {
+            return SpawnSprite(point[0], point[1], d, args);
+        }
+        public static ISprite SpawnSprite(double x, double y, SpriteData d, params object[] args)
+        {
+            switch (d.ID)
+            {
+                case SpriteID.GreenShellessKoopa:
+                    return new ShellessKoopa(x, y, d, 0);
+                case SpriteID.Test:
+                    d.InteractWithSprites = false;
+                    return new TestSprite(x, y, d);
+                default:
+                    return null;
+            }
+        }
+    }
+
+    public class UnlistedSpriteException : Exception
+    {
+        public UnlistedSpriteException(string message) : base(message)
+        {
+        }
+    }
+    public class UnindexedSpriteException : Exception
+    {
+        public UnindexedSpriteException(string message) : base(message)
+        {
         }
     }
 }

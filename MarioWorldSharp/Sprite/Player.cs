@@ -46,6 +46,7 @@ namespace MarioWorldSharp.Sprite
         }
         public double XSpeed { get; set; }
         public double YSpeed { get; set; }
+        public double FacingAngle { get; set; }
         public byte VertGravity { get; set; }
         public byte HorizGravity { get; set; }
         public bool BlockedBellow { get; set; }
@@ -216,6 +217,9 @@ namespace MarioWorldSharp.Sprite
                 //SMW Jump Velocity formula
                 //BaseJumpVelocity - (640 * |XSpeed * 16 / 4| / 256)
                 YSpeed = (-80.0 - (640.0 * Math.Abs(XSpeed * 1.5) / 256.0)) / 16.0;
+                jumped = true;
+                if (DashTimer >= 112)
+                    dashJumped = true;
             }
         }
 
@@ -228,20 +232,17 @@ namespace MarioWorldSharp.Sprite
                 else
                     Pose = 0x0B;
             }
-            if (!jumped && BlockedBellow)
-            {
-                jumped = true;
-                if (DashTimer >= 112)
-                    dashJumped = true;
-            }
         }
 
         private void Spinjump(object sender, EventArgs e)
         {
             if (!jumped && BlockedBellow)
             {
-                spinJumped = true;
                 YSpeed = (-74.0 - ((592.0 * Math.Abs(XSpeed * 2.0)) / 256.0)) / 16.0;
+                jumped = true;
+                spinJumped = true;
+                if (DashTimer >= 112)
+                    dashJumped = true;
             }
         }
 
@@ -252,12 +253,20 @@ namespace MarioWorldSharp.Sprite
             double decceleration = 640.0 / 256.0 / 16.0;
             double maxXSpeed = 20.0 / 16.0;
 
+            if (BlockedBellow && jumped)
+            {
+                jumped = false;
+                dashJumped = false;
+                spinJumped = false;
+            }
+
             if (BlockedBellow && Input.Down.IsKeyHeld())
                 ducking = true;
             else if (BlockedBellow)
                 ducking = false;
 
-            bool moving = (Input.Left.IsKeyHeld() || Input.Right.IsKeyHeld()) && !ducking;
+            bool notTwoHDir = !(Input.Left.IsKeyHeld() && Input.Right.IsKeyHeld());
+            bool moving = (Input.Left.IsKeyHeld() || Input.Right.IsKeyHeld()) && !ducking && notTwoHDir;
 
             if (Input.Dash.IsKeyHeld())
             {
@@ -324,18 +333,6 @@ namespace MarioWorldSharp.Sprite
             if (!dashJumped && DashTimer < 112 && animationTimer == 0 && !BlockedBellow && (YSpeed > 0 || (YSpeed < 0 && !jumped)))
                 Pose = 0x24;
 
-            if (!(Input.Spinjump.IsKeyHeld() || Input.Jump.IsKeyHeld()))
-            {
-                if (BlockedBellow)
-                {
-                    if (jumped)
-                        animationTimer = 0;
-                    jumped = false;
-                    dashJumped = false;
-                    spinJumped = false;
-                }
-            }
-
             if (spinJumped && !BlockedBellow)
             {
                 if (animationTimer == 0 || animationTimer > 7)
@@ -366,42 +363,44 @@ namespace MarioWorldSharp.Sprite
                 collisionBox.Height = 16;
             }
 
-            moving = (Input.Left.IsKeyHeld() || Input.Right.IsKeyHeld()) && !ducking;
-            bool notTwoHDir = !(Input.Left.IsKeyHeld() && Input.Right.IsKeyHeld());
+            moving = (Input.Left.IsKeyHeld() || Input.Right.IsKeyHeld()) && notTwoHDir;
 
             #region Moving
-            if ((!BlockedBellow || !ducking) && notTwoHDir && Input.Left.IsKeyHeld())
+            if ((!BlockedBellow || !ducking) && notTwoHDir && moving)
             {
-                facingRight = false;
-                if (XSpeed > 0)
+                if (Input.Left.IsKeyHeld())
                 {
-                    if (BlockedBellow)
-                        Pose = 0x0D;
-                    XSpeed -= decceleration;
-                }
-                else
-                {
-                    if (XSpeed + acceleration > -maxXSpeed)
-                        XSpeed -= acceleration;
+                    facingRight = false;
+                    if (XSpeed > 0)
+                    {
+                        if (BlockedBellow)
+                            Pose = 0x0D;
+                        XSpeed -= decceleration;
+                    }
                     else
-                        XSpeed = -maxXSpeed;
-                }
-            }
-            else if ((!BlockedBellow || !ducking) && notTwoHDir && Input.Right.IsKeyHeld())
-            {
-                facingRight = true;
-                if (XSpeed < 0)
+                    {
+                        if (XSpeed + acceleration > -maxXSpeed)
+                            XSpeed -= acceleration;
+                        else
+                            XSpeed = -maxXSpeed;
+                    }
+                } 
+                else if (Input.Right.IsKeyHeld())
                 {
-                    if (BlockedBellow)
-                        Pose = 0x0D;
-                    XSpeed += decceleration;
-                }
-                else
-                {
-                    if (XSpeed + acceleration < maxXSpeed)
-                        XSpeed += acceleration;
+                    facingRight = true;
+                    if (XSpeed < 0)
+                    {
+                        if (BlockedBellow)
+                            Pose = 0x0D;
+                        XSpeed += decceleration;
+                    }
                     else
-                        XSpeed = maxXSpeed;
+                    {
+                        if (XSpeed + acceleration < maxXSpeed)
+                            XSpeed += acceleration;
+                        else
+                            XSpeed = maxXSpeed;
+                    }
                 }
             }
             #endregion
@@ -409,16 +408,16 @@ namespace MarioWorldSharp.Sprite
             {
                 decceleration = 1.0 / 16.0;
                 # region Friction (Decceleration only on ground)
-                if (BlockedBellow)
+                if (BlockedBellow && (!moving || ducking))
                 {
-                    if (!moving && XSpeed > 0)
+                    if (XSpeed > 0)
                     {
                         if (XSpeed - decceleration <= 0)
                             XSpeed = 0;
                         else
                             XSpeed -= decceleration;
                     }
-                    else if (!moving && XSpeed < 0)
+                    else if (XSpeed < 0)
                     {
                         if (XSpeed + decceleration >= 0)
                             XSpeed = 0;
@@ -427,17 +426,6 @@ namespace MarioWorldSharp.Sprite
                     }
                 }
                 #endregion
-
-                if (facingRight && moving)
-                {
-                    if (XSpeed + .125 <= maxXSpeed)
-                        XSpeed += .125;
-                }
-                else if (!facingRight && moving)
-                {
-                    if (XSpeed - .125 >= -maxXSpeed)
-                        XSpeed -= .125;
-                }
             }
         }
 
@@ -447,6 +435,11 @@ namespace MarioWorldSharp.Sprite
                 new Rectangle((int)XPosition - (int)SMW.Level.X, (int)YPosition + YDrawDisplacement - (int)SMW.Level.Y, GetTexture().Width, GetTexture().Height),
                 new Rectangle(0, 0, GetTexture().Width, GetTexture().Height),
                 Color.White, 0.0F, Vector2.Zero, GetSpriteEffect(), 1F);
+        }
+
+        public void Kill()
+        {
+            throw new NotImplementedException();
         }
     }
 }

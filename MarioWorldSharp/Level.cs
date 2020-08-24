@@ -24,6 +24,7 @@ namespace MarioWorldSharp
         private double _midY;
         private double _xPos;
         private double _yPos;
+        private int _SpriteCount;
         public double X 
         {
             get { return _xPos; }
@@ -43,13 +44,14 @@ namespace MarioWorldSharp
             }
         }
         public KdTree<double, SpriteData> Sprites { get; set; }
+        public int SpriteCount { get => _SpriteCount; }
+
         private Level nextLayer;
         private Level prevLayer;
         private int width;
         private int height;
         private double XScrollMultiplier;
         private double YScrollMultiplier;
-        private int SpriteCount;
 
         private int scrollingHorz;
         private int scrollingVert;
@@ -62,7 +64,7 @@ namespace MarioWorldSharp
             width = chunks.GetLength(0) * 16;
             height = chunks.GetLength(1) * 16;
             Sprites = new KdTree<double, SpriteData>(2, new DoubleMath());
-            SpriteCount = 0;
+            _SpriteCount = 0;
             X = 0; Y = 0;
 
             #region Autogenerate Level
@@ -96,17 +98,19 @@ namespace MarioWorldSharp
             chunk[11, 9] = 0x130;
 
             Random rand = new Random();
-            for (int i = 0; i < 500; i++)
-                AddSprite(rand.NextDouble() * 5000.0, 60, SpriteID.GreenShellessKoopa);
+            for (double i = 0; i < width * 16; i += 64)
+                AddSprite(i, 60, SpriteID.GreenShellessKoopa);
+            Sprites.Balance();
 
             #endregion
         }
 
-        private void AddSprite(double x, double y, SpriteID s)
+        private void AddSprite(double x, double y, SpriteID s, params object[] args)
         {
-            Sprites.Add(new[] { x, y }, new SpriteData { ID = s, Index = SpriteCount, Spawned = false });
-            SpriteCount++;
+            Sprites.Add(new[] { x, y }, new SpriteData { ID = s, Index = SpriteCount, Args = args });
+            _SpriteCount++;
         }
+
         public void Scroll(double playerX, double playerY)
         {
             double newX = X;
@@ -207,16 +211,14 @@ namespace MarioWorldSharp
 
         public void RemoveSprite(SpriteData s)
         {
-            if (Sprites.TryFindValue(s, out double[] point) )
-            {
-                Sprites.RemoveAt(point);
-            }
-        }
+            if (s.Index == -1)
+                throw new UnindexedSpriteException($"{s} was spawned by other means. You cannot remove this sprite from the level.");
 
-        public void HideSprite(SpriteData s)
-        {
-            if (Sprites.TryFindValue(s, out double[] point))
-                Sprites.FindValueAt(point).Spawned = false;
+            if (Sprites.TryFindValueReference(s, out double[] point) )
+            {
+                Sprites.RemoveSpecific(point, s);
+                _SpriteCount--;
+            }
         }
 
         public void SpawnSprites()
@@ -228,7 +230,6 @@ namespace MarioWorldSharp
                 SpriteData d = n.Value;
                 if (!d.Spawned)
                 {
-                    d.Spawned = true;
                     SpriteSpawner.SpawnSprite(n.Point, d);
                 }
             }
@@ -241,6 +242,7 @@ namespace MarioWorldSharp
 
             double x = 200;
             double y = 112;
+            double r = 0;
             switch (scrollingHorz)
             {
                 case 1:
@@ -248,6 +250,9 @@ namespace MarioWorldSharp
                     break;
                 case -1:
                     x = 0;
+                    break;
+                case 0:
+                    r += 200;
                     break;
             }
             switch (scrollingVert)
@@ -258,8 +263,11 @@ namespace MarioWorldSharp
                 case -1:
                     y = 0;
                     break;
+                case 0:
+                    r += 112;
+                    break;
             }
-            KdTreeNode<double, SpriteData>[] sprites = Sprites.RadialSearch(new[] { X + x, Y + y }, 112.0);
+            KdTreeNode<double, SpriteData>[] sprites = Sprites.RadialSearch(new[] { X + x, Y + y }, r);
 
             foreach (KdTreeNode<double, SpriteData> n in sprites)
             {
@@ -277,6 +285,11 @@ namespace MarioWorldSharp
                     }
                 }
             }
+        }
+
+        internal int GetSpriteCount()
+        {
+            return SpriteCount;
         }
     }
     
