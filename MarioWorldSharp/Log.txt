@@ -1,0 +1,338 @@
+Data Compression Sniff Program Version 1.13
+DLL Interface for Lunar Compress.dll
+Programmed by FuSoYa, Defender of Relm
+FuSoYa's Niche - http://fusoya.eludevisibility.org
+
+Lunar Compress DLL Version 1.81
+
+File to Scan: baserom.smc
+Start Address: 40200
+End Address: 5FF0D
+Flags: 200
+ Filter: 0
+ Combo File: No
+ Split Files: Yes
+ Exclude Matched Area: Yes
+ Decompress from RAM: No
+Format 1: 1
+Format 2: 0
+
+
+Compressed Structure #1 Info...
+  Start Address: 40200
+  End Address: 441C0
+  Compressed Size: 3FC0
+  Uncompressed Size: 5D00
+
+Compressed Structure #2 Info...
+  Start Address: 441C0
+  End Address: 45BF9
+  Compressed Size: 1A39
+  Uncompressed Size: 2400
+
+Compressed Structure #3 Info...
+  Start Address: 45BF9
+  End Address: 46431
+  Compressed Size: 838
+  Uncompressed Size: C00
+
+Compressed Structure #4 Info...
+  Start Address: 46431
+  End Address: 46EBB
+  Compressed Size: A8A
+  Uncompressed Size: C00
+
+Compressed Structure #5 Info...
+  Start Address: 46EBB
+  End Address: 47752
+  Compressed Size: 897
+  Uncompressed Size: C00
+
+Compressed Structure #6 Info...
+  Start Address: 47752
+  End Address: 4817D
+  Compressed Size: A2B
+  Uncompressed Size: C00
+
+Compressed Structure #7 Info...
+  Start Address: 4817D
+  End Address: 48B63
+  Compressed Size: 9E6
+  Uncompressed Size: C00
+
+Compressed Structure #8 Info...
+  Start Address: 48B63
+  End Address: 4956C
+  Compressed Size: A09
+  Uncompressed Size: C00
+
+Compressed Structure #9 Info...
+  Start Address: 4956C
+  End Address: 49F10
+  Compressed Size: 9A4
+  Uncompressed Size: C00
+
+Compressed Structure #10 Info...
+  Start Address: 49F10
+  End Address: 4A857
+  Compressed Size: 947
+  Uncompressed Size: C00
+
+Compressed Structure #11 Info...
+  Start Address: 4A857
+  End Address: 4B1A1
+  Compressed Size: 94A
+  Uncompressed Size: C00
+
+Compressed Structure #12 Info...
+  Start Address: 4B1A1
+  End Address: 4BC15
+  Compressed Size: A74
+  Uncompressed Size: C00
+
+Compressed Structure #13 Info...
+  Start Address: 4BC15
+  End Address: 4C59C
+  Compressed Size: 987
+  Uncompressed Size: C00
+
+Compressed Structure #14 Info...
+  Start Address: 4C59C
+  End Address: 4CF63
+  Compressed Size: 9C7
+  Uncompressed Size: C00
+
+Compressed Structure #15 Info...
+  Start Address: 4CF63
+  End Address: 4D7D2
+  Compressed Size: 86F
+  Uncompressed Size: C00
+
+Compressed Structure #16 Info...
+  Start Address: 4D7D2
+  End Address: 4DFCB
+  Compressed Size: 7F9
+  Uncompressed Size: C00
+
+Compressed Structure #17 Info...
+  Start Address: 4DFCB
+  End Address: 4E8E5
+  Compressed Size: 91A
+  Uncompressed Size: C00
+
+Compressed Structure #18 Info...
+  Start Address: 4E8E5
+  End Address: 4F11E
+  Compressed Size: 839
+  Uncompressed Size: C00
+
+Compressed Structure #19 Info...
+  Start Address: 4F11E
+  End Address: 4F9AF
+  Compressed Size: 891
+  Uncompressed Size: C00
+
+Compressed Structure #20 Info...
+  Start Address: 4F9AF
+  End Address: 501BD
+  Compressed Size: 80E
+  Uncompressed Size: C00
+
+Compressed Structure #21 Info...
+  Start Address: 501BD
+  End Address: 50B10
+  Compressed Size: 953
+  Uncompressed Size: C00
+
+Compressed Structure #22 Info...
+  Start Address: 50B10
+  End Address: 51548
+  Compressed Size: A38
+  Uncompressed Size: C00
+
+Compressed Structure #23 Info...
+  Start Address: 51548
+  End Address: 51CE8
+  Compressed Size: 7A0
+  Uncompressed Size: C00
+
+Compressed Structure #24 Info...
+  Start Address: 51CE8
+  End Address: 52574
+  Compressed Size: 88C
+  Uncompressed Size: C00
+
+Compressed Structure #25 Info...
+  Start Address: 52574
+  End Address: 52BB4
+  Compressed Size: 640
+  Uncompressed Size: C00
+
+Compressed Structure #26 Info...
+  Start Address: 52BB4
+  End Address: 534AD
+  Compressed Size: 8F9
+  Uncompressed Size: C00
+
+Compressed Structure #27 Info...
+  Start Address: 534AD
+  End Address: 53DE4
+  Compressed Size: 937
+  Uncompressed Size: C00
+
+Compressed Structure #28 Info...
+  Start Address: 53DE4
+  End Address: 54580
+  Compressed Size: 79C
+  Uncompressed Size: C00
+
+Compressed Structure #29 Info...
+  Start Address: 54580
+  End Address: 54E66
+  Compressed Size: 8E6
+  Uncompressed Size: C00
+
+Compressed Structure #30 Info...
+  Start Address: 54E66
+  End Address: 5567E
+  Compressed Size: 818
+  Uncompressed Size: C00
+
+Compressed Structure #31 Info...
+  Start Address: 5567E
+  End Address: 55E88
+  Compressed Size: 80A
+  Uncompressed Size: C00
+
+Compressed Structure #32 Info...
+  Start Address: 55E88
+  End Address: 5687F
+  Compressed Size: 9F7
+  Uncompressed Size: C00
+
+Compressed Structure #33 Info...
+  Start Address: 5687F
+  End Address: 57043
+  Compressed Size: 7C4
+  Uncompressed Size: C00
+
+Compressed Structure #34 Info...
+  Start Address: 57043
+  End Address: 578A1
+  Compressed Size: 85E
+  Uncompressed Size: C00
+
+Compressed Structure #35 Info...
+  Start Address: 578A1
+  End Address: 58165
+  Compressed Size: 8C4
+  Uncompressed Size: C00
+
+Compressed Structure #36 Info...
+  Start Address: 58165
+  End Address: 58ACD
+  Compressed Size: 968
+  Uncompressed Size: C00
+
+Compressed Structure #37 Info...
+  Start Address: 58ACD
+  End Address: 593CA
+  Compressed Size: 8FD
+  Uncompressed Size: C00
+
+Compressed Structure #38 Info...
+  Start Address: 593CA
+  End Address: 59CE5
+  Compressed Size: 91B
+  Uncompressed Size: C00
+
+Compressed Structure #39 Info...
+  Start Address: 59CE5
+  End Address: 5A5B5
+  Compressed Size: 8D0
+  Uncompressed Size: C00
+
+Compressed Structure #40 Info...
+  Start Address: 5A5B5
+  End Address: 5B021
+  Compressed Size: A6C
+  Uncompressed Size: C00
+
+Compressed Structure #41 Info...
+  Start Address: 5B021
+  End Address: 5B944
+  Compressed Size: 923
+  Uncompressed Size: C00
+
+Compressed Structure #42 Info...
+  Start Address: 5B944
+  End Address: 5C26C
+  Compressed Size: 928
+  Uncompressed Size: C00
+
+Compressed Structure #43 Info...
+  Start Address: 5C26C
+  End Address: 5C8A3
+  Compressed Size: 637
+  Uncompressed Size: 800
+
+Compressed Structure #44 Info...
+  Start Address: 5C8A3
+  End Address: 5CD7B
+  Compressed Size: 4D8
+  Uncompressed Size: 800
+
+Compressed Structure #45 Info...
+  Start Address: 5CD7B
+  End Address: 5D2F0
+  Compressed Size: 575
+  Uncompressed Size: 800
+
+Compressed Structure #46 Info...
+  Start Address: 5D2F0
+  End Address: 5D9B9
+  Compressed Size: 6C9
+  Uncompressed Size: 800
+
+Compressed Structure #47 Info...
+  Start Address: 5D9B9
+  End Address: 5E206
+  Compressed Size: 84D
+  Uncompressed Size: C00
+
+Compressed Structure #48 Info...
+  Start Address: 5E206
+  End Address: 5EB36
+  Compressed Size: 930
+  Uncompressed Size: C00
+
+Compressed Structure #49 Info...
+  Start Address: 5EB36
+  End Address: 5F385
+  Compressed Size: 84F
+  Uncompressed Size: C00
+
+Compressed Structure #50 Info...
+  Start Address: 5F385
+  End Address: 5F5BB
+  Compressed Size: 236
+  Uncompressed Size: 400
+
+Compressed Structure #51 Info...
+  Start Address: 5F5BB
+  End Address: 5FA00
+  Compressed Size: 445
+  Uncompressed Size: 600
+
+Compressed Structure #52 Info...
+  Start Address: 5FA00
+  End Address: 5FF0D
+  Compressed Size: 50D
+  Uncompressed Size: 600
+
+CONSECUTIVE GROUP MATCH SUMMARY...
+  Start Address: 40200
+  End Address: 5FF0D
+  Number of matches: 34
+
+Done!

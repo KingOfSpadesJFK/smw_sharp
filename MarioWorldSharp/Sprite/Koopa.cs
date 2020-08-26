@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using static MarioWorldSharp.Level;
+using MarioWorldSharp.Levels;
 
 namespace MarioWorldSharp.Sprite
 {
@@ -35,8 +35,6 @@ namespace MarioWorldSharp.Sprite
 
         public override void Process()
         {
-            SpriteCollision();
-            EnvironmentCollision();
             switch (KoopaType)
             {
                 case KoopaType.Yellow:
@@ -66,17 +64,34 @@ namespace MarioWorldSharp.Sprite
 
             UpdateXPosition();
             UpdateYPosition();
+            SpriteCollision();
+            EnvironmentCollision();
+            PlayerCollision();
             OffScreen();
         }
 
         protected override void SpriteCollision()
         {
-            if (IsCollidingWithSprites(out var nearestNeighbors))
+            ISprite[] collidingWith = GetCollidedSprites();
+
+            int[] indecies = new int[]
+            { 3,5,7 };
+            if (FacingLeft)
+                for (int i = 0; i < 3; i++)
+                    indecies[i]--;
+
+            foreach (int i in indecies)
             {
-                if (nearestNeighbors[1].Data.CollideTurnaround && nearestNeighbors[1].FacingAngle != this.FacingAngle)
+                if (collidingWith[i] == null)
+                    continue;
+
+                if (collidingWith[i].Data.CollideTurnaround)
                 {
-                    nearestNeighbors[1].FacingAngle += 180.0;
+                    if (collidingWith[i].FacingAngle != this.FacingAngle)
+                        collidingWith[i].FacingAngle += 180.0;
+
                     this.FacingAngle += 180.0;
+                    return;
                 }
             }
         }

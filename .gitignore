@@ -2,6 +2,8 @@
 .vs
 MarioWorldSharp/bin
 MarioWorldSharp/obj
+AssetExtraction/bin
+AssetExtraction/obj
 
 #SMW
 outerworkspace/snes
@@ -9,3 +11,8 @@ outerworkspace/snes
 # ROM Files
 *.smc
 *.sfc
+
+#SMW Assets
+*.bin
+MarioWorldSharp/assets/snes
+*/snes/

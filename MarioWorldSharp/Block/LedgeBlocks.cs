@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace MarioWorldSharp.Block
+namespace MarioWorldSharp.Blocks
 {
     public class Ledge : PassThroughBlock
     {
@@ -18,4 +18,6 @@ namespace MarioWorldSharp.Block
                 Blocks.SOLID_BLOCK.Bellow(p, x, y);
         }
     }
+
+
 }

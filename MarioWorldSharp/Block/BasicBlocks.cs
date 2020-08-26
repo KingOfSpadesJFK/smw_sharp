@@ -10,9 +10,9 @@ using Microsoft.Xna.Framework.Input;
 using MonoGame;
 using MarioWorldSharp.Sprite;
 
-namespace MarioWorldSharp.Block
+namespace MarioWorldSharp.Blocks
 {
-    public class SolidBlock : AbstractBlock
+    public class SolidBlock : Block
     {
         public override void Above(Player p, double x, double y)
         {
@@ -119,7 +119,7 @@ namespace MarioWorldSharp.Block
         }
     }
 
-    public class PassThroughBlock : AbstractBlock
+    public class PassThroughBlock : Block
     {
     }
 }

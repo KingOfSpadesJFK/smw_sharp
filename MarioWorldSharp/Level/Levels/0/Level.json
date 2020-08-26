@@ -1,0 +1,6 @@
+{
+  "Name": "Test",
+  "PlayerStartPosition": [ 0.0, 0.0 ],
+  "TileGraphics": [ 14, 17, 15 ],
+  "SpriteGraphics": [ 0, 1, 13, 2 ]
+}

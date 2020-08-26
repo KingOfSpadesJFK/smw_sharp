@@ -4,6 +4,10 @@ using System;
 using System.Runtime.InteropServices;
 using KdTree;
 using KdTree.Math;
+using System.Reflection;
+using System.IO;
+using Microsoft.VisualBasic.CompilerServices;
+using System.Collections.Generic;
 
 namespace MarioWorldSharp
 {
@@ -13,6 +17,7 @@ namespace MarioWorldSharp
     /// 
     public static class Program
     {
+        #region Console
         [DllImport("kernel32.dll", EntryPoint = "GetStdHandle", SetLastError = true, CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
         public static extern IntPtr GetStdHandle(int nStdHandle);
 
@@ -22,13 +27,14 @@ namespace MarioWorldSharp
         private const int STD_OUTPUT_HANDLE = -11;
         private static bool showConsole = true; //Or false if you don't want to see the console
         private static bool runGame = true;
+        #endregion
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
         /// 
-
         [STAThread]
-        static void Main()
+        static void Main(string[] args)
         {
             if (showConsole)
             {
@@ -47,6 +53,15 @@ namespace MarioWorldSharp
                 TestKdTree();
                 while (true) ;
             }
+        }
+
+        public static byte[] ExtractEmbeddedBin(string filePath)
+        {
+            Assembly assembly = Assembly.GetCallingAssembly();
+
+            using Stream s = assembly.GetManifestResourceStream($"MarioWorldSharp.{filePath}");
+            using BinaryReader b = new BinaryReader(s);
+            return b.ReadBytes((int)s.Length);
         }
 
         private static void TestKdTree()

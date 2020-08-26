@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGame;
-using static MarioWorldSharp.Level;
+using MarioWorldSharp.Levels;
 
 namespace MarioWorldSharp.Sprite
 {
@@ -60,6 +60,7 @@ namespace MarioWorldSharp.Sprite
         public byte DashTimer { get; set; }
         public SpriteStatus Status { get; set; }
         public SpriteData Data { get; set; }
+        public bool SpinJumping { get => spinJumped; }
 
         private Rectangle collisionBox;
         private bool facingRight;
@@ -91,7 +92,7 @@ namespace MarioWorldSharp.Sprite
             }
             else
             {
-                YDrawDisplacement = 10;
+                YDrawDisplacement = 9;
                 colDisp = 16 + heightDisp;
                 collisionBox = new Rectangle(0, 0, 16, 16 - heightDisp);
             }
@@ -107,8 +108,6 @@ namespace MarioWorldSharp.Sprite
             //Input Events
             SMW.InputEvent.JumpPressEvent += Jump;
             SMW.InputEvent.SpinPressEvent += Spinjump;
-            SMW.InputEvent.JumpDownEvent += Jumping;
-            SMW.InputEvent.SpinDownEvent += Jumping;
         }
 
         public Rectangle GetCollisionBox() { return collisionBox; }
@@ -153,14 +152,6 @@ namespace MarioWorldSharp.Sprite
                 UpdateXPositionition();
                 UpdateYPositionition();
             }
-        }
-
-        public SpriteEffects GetSpriteEffect()
-        {
-            if (!flip)
-                return SpriteEffects.FlipHorizontally;
-            else
-                return SpriteEffects.None;
         }
 
         public Texture2D GetTexture()
@@ -217,21 +208,15 @@ namespace MarioWorldSharp.Sprite
                 //SMW Jump Velocity formula
                 //BaseJumpVelocity - (640 * |XSpeed * 16 / 4| / 256)
                 YSpeed = (-80.0 - (640.0 * Math.Abs(XSpeed * 1.5) / 256.0)) / 16.0;
-                jumped = true;
-                if (DashTimer >= 112)
-                    dashJumped = true;
+                Jumping();
             }
         }
 
-        private void Jumping(object sender, EventArgs e)
+        private void Jumping()
         {
-            if (animationTimer == 0 && YSpeed <= 0 && !BlockedBellow)
-            {
-                if (dashJumped)
-                    Pose = 0x0C;
-                else
-                    Pose = 0x0B;
-            }
+            jumped = true;
+            if (DashTimer >= 112)
+                dashJumped = true;
         }
 
         private void Spinjump(object sender, EventArgs e)
@@ -239,10 +224,8 @@ namespace MarioWorldSharp.Sprite
             if (!jumped && BlockedBellow)
             {
                 YSpeed = (-74.0 - ((592.0 * Math.Abs(XSpeed * 2.0)) / 256.0)) / 16.0;
-                jumped = true;
                 spinJumped = true;
-                if (DashTimer >= 112)
-                    dashJumped = true;
+                Jumping();
             }
         }
 
@@ -276,6 +259,17 @@ namespace MarioWorldSharp.Sprite
                     maxXSpeed = 48.0 / 16.0;
                 else
                     maxXSpeed = 36.0 / 16.0;
+            }
+
+            if (Input.Jump.IsKeyHeld() || Input.Spinjump.IsKeyHeld())
+            {
+                if (animationTimer == 0 && YSpeed <= 0 && !BlockedBellow)
+                {
+                    if (dashJumped)
+                        Pose = 0x0C;
+                    else
+                        Pose = 0x0B;
+                }
             }
 
             if (BlockedBellow && (moving || XSpeed != 0))
@@ -434,7 +428,7 @@ namespace MarioWorldSharp.Sprite
             spriteBatch.Draw(GetTexture(),
                 new Rectangle((int)XPosition - (int)SMW.Level.X, (int)YPosition + YDrawDisplacement - (int)SMW.Level.Y, GetTexture().Width, GetTexture().Height),
                 new Rectangle(0, 0, GetTexture().Width, GetTexture().Height),
-                Color.White, 0.0F, Vector2.Zero, GetSpriteEffect(), 1F);
+                Color.White, 0.0F, Vector2.Zero, flip ? SpriteEffects.FlipHorizontally : SpriteEffects.None, 1F);
         }
 
         public void Kill()

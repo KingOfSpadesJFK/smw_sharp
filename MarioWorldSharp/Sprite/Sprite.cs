@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGame;
-using static MarioWorldSharp.Level;
+using MarioWorldSharp.Levels;
 
 namespace MarioWorldSharp.Sprite
 {
@@ -193,12 +193,42 @@ namespace MarioWorldSharp.Sprite
 
         protected virtual void PlayerCollision()
         {
-            //TODO: Implement
+            bool[] collidedSides = GetSidesOfPlayerCollision();
+            var p = SMW.Character;
+            if (collidedSides[0])
+            {
+                if (p.GetCollisionBox().Bottom < this.collisionBox.Bottom - 4)
+                {
+                    if (!p.SpinJumping)
+                        p.YSpeed = (-80.0 - (640.0 * Math.Abs(p.XSpeed * 1.5) / 256.0)) / 16.0;
+                    else
+                        p.YSpeed = 0.0;
+                    this.Kill();
+                    return;
+                }
+            }
+        }
+
+        protected virtual bool[] GetSidesOfPlayerCollision()
+        {
+            bool[] collidedSides = new bool[8];
+            var p = SMW.Character;
+
+            collidedSides[0] = p.GetCollisionBox().Contains(this.collisionBox.Left + this.collisionBox.Width / 2.0F, this.collisionBox.Top);
+            collidedSides[1] = p.GetCollisionBox().Contains(this.collisionBox.Left + this.collisionBox.Width / 2.0F, this.collisionBox.Bottom);
+            collidedSides[2] = p.GetCollisionBox().Contains(this.collisionBox.Left, this.collisionBox.Top + this.collisionBox.Height / 2.0F);
+            collidedSides[3] = p.GetCollisionBox().Contains(this.collisionBox.Right, this.collisionBox.Top + this.collisionBox.Height / 2.0F);
+
+            collidedSides[4] = p.GetCollisionBox().Contains(this.collisionBox.Left, this.collisionBox.Top);
+            collidedSides[5] = p.GetCollisionBox().Contains(this.collisionBox.Right, this.collisionBox.Top);
+            collidedSides[6] = p.GetCollisionBox().Contains(this.collisionBox.Left, this.collisionBox.Bottom);
+            collidedSides[7] = p.GetCollisionBox().Contains(this.collisionBox.Right, this.collisionBox.Bottom);
+
+            return collidedSides;
         }
 
         protected virtual void SpriteCollision()
         {
-            //TODO: Implement
         }
 
         protected bool IsCollidingWithSprites(out ISprite[] nearestNeighbors)
@@ -226,7 +256,6 @@ namespace MarioWorldSharp.Sprite
             //Bottom = 1
             if (s.GetCollisionBox().Contains(this.collisionBox.Left + this.collisionBox.Width / 2.0F, this.collisionBox.Bottom))
             { coll = SpriteCollisionSide.Bottom; return true; }
-
             //Left = 2
             if (s.GetCollisionBox().Contains(this.collisionBox.Left, this.collisionBox.Top + this.collisionBox.Height / 2.0F))
             { coll = SpriteCollisionSide.Left; return true; }
@@ -234,12 +263,25 @@ namespace MarioWorldSharp.Sprite
             if (s.GetCollisionBox().Contains(this.collisionBox.Right, this.collisionBox.Top + this.collisionBox.Height / 2.0F))
             { coll = SpriteCollisionSide.Right; return true; }
 
+            //Top Left = 4
+            if (s.GetCollisionBox().Contains(this.collisionBox.Left, this.collisionBox.Top))
+            { coll = SpriteCollisionSide.TopLeft; return true; }
+            //Top Right = 5
+            if (s.GetCollisionBox().Contains(this.collisionBox.Right, this.collisionBox.Top))
+            { coll = SpriteCollisionSide.TopRight; return true; }
+            //Bottom Left = 6
+            if (s.GetCollisionBox().Contains(this.collisionBox.Left, this.collisionBox.Bottom))
+            { coll = SpriteCollisionSide.BottomLeft; return true; }
+            //Bottom Right = 7
+            if (s.GetCollisionBox().Contains(this.collisionBox.Right, this.collisionBox.Bottom))
+            { coll = SpriteCollisionSide.BottomRight; return true; }
+
             return false;
         }
 
         public enum SpriteCollisionSide : byte
         {
-            Top, Bottom, Left, Right
+            Top, Bottom, Left, Right, TopLeft, TopRight, BottomLeft, BottomRight
         }
 
         protected bool IsCollidingWithSprite(ISprite s)
@@ -249,7 +291,7 @@ namespace MarioWorldSharp.Sprite
 
         protected ISprite[] GetCollidedSprites()
         {
-            ISprite[] sprites = new ISprite[5];
+            ISprite[] sprites = new ISprite[8];
 
             ISprite[] nearestNeighbors = SpriteHandler.GetNearestNeighbors(new[] { XPosition, YPosition }, 10);
             foreach (ISprite s in nearestNeighbors)
@@ -258,18 +300,31 @@ namespace MarioWorldSharp.Sprite
                 if (Object.ReferenceEquals(this, s))
                     continue;
 
+                //Top
                 if (s.GetCollisionBox().Contains(this.collisionBox.Left + this.collisionBox.Width / 2.0F, this.collisionBox.Top))
                     sprites[0] = s;
+                //Bottom
                 if (s.GetCollisionBox().Contains(this.collisionBox.Left + this.collisionBox.Width / 2.0F, this.collisionBox.Bottom))
                     sprites[1] = s;
-
+                //Left
                 if (s.GetCollisionBox().Contains(this.collisionBox.Left, this.collisionBox.Top + this.collisionBox.Height / 2.0F))
                     sprites[2] = s;
+                //Right
                 if (s.GetCollisionBox().Contains(this.collisionBox.Right, this.collisionBox.Top + this.collisionBox.Height / 2.0F))
                     sprites[3] = s;
 
-                if (s.GetCollisionBox().Contains(this.collisionBox))
+                //Top Left
+                if (s.GetCollisionBox().Contains(this.collisionBox.Left, this.collisionBox.Top))
                     sprites[4] = s;
+                //Top Right
+                if (s.GetCollisionBox().Contains(this.collisionBox.Right, this.collisionBox.Top))
+                    sprites[5] = s;
+                //Bottom Left
+                if (s.GetCollisionBox().Contains(this.collisionBox.Left, this.collisionBox.Bottom))
+                    sprites[6] = s;
+                //Bottom Right
+                if (s.GetCollisionBox().Contains(this.collisionBox.Right, this.collisionBox.Bottom))
+                    sprites[7] = s;
             }
             return sprites;
         }

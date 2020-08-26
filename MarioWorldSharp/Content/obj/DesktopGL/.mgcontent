@@ -4,39 +4,13 @@
   <Platform>DesktopGL</Platform>
   <Config />
   <SourceFiles>
-    <File>C:/Users/limam/source/repos/MarioWorldSharp/MarioWorldSharp/Content/../assets/font/debug.spritefont</File>
-    <File>C:/Users/limam/source/repos/MarioWorldSharp/MarioWorldSharp/Content/../assets/image/map16/grass1.png</File>
-    <File>C:/Users/limam/source/repos/MarioWorldSharp/MarioWorldSharp/Content/../assets/image/map16/grass2.png</File>
-    <File>C:/Users/limam/source/repos/MarioWorldSharp/MarioWorldSharp/Content/../assets/image/player/small/backward.png</File>
-    <File>C:/Users/limam/source/repos/MarioWorldSharp/MarioWorldSharp/Content/../assets/image/player/small/duck.png</File>
-    <File>C:/Users/limam/source/repos/MarioWorldSharp/MarioWorldSharp/Content/../assets/image/player/small/fall.png</File>
-    <File>C:/Users/limam/source/repos/MarioWorldSharp/MarioWorldSharp/Content/../assets/image/player/small/fastjump.png</File>
-    <File>C:/Users/limam/source/repos/MarioWorldSharp/MarioWorldSharp/Content/../assets/image/player/small/fastrun1.png</File>
-    <File>C:/Users/limam/source/repos/MarioWorldSharp/MarioWorldSharp/Content/../assets/image/player/small/fastrun2.png</File>
-    <File>C:/Users/limam/source/repos/MarioWorldSharp/MarioWorldSharp/Content/../assets/image/player/small/forward.png</File>
-    <File>C:/Users/limam/source/repos/MarioWorldSharp/MarioWorldSharp/Content/../assets/image/player/small/idle.png</File>
-    <File>C:/Users/limam/source/repos/MarioWorldSharp/MarioWorldSharp/Content/../assets/image/player/small/jump.png</File>
-    <File>C:/Users/limam/source/repos/MarioWorldSharp/MarioWorldSharp/Content/../assets/image/player/small/lookup.png</File>
-    <File>C:/Users/limam/source/repos/MarioWorldSharp/MarioWorldSharp/Content/../assets/image/player/small/run.png</File>
-    <File>C:/Users/limam/source/repos/MarioWorldSharp/MarioWorldSharp/Content/../assets/image/player/small/skid.png</File>
-    <File>C:/Users/limam/source/repos/MarioWorldSharp/MarioWorldSharp/Content/../assets/image/ui/uichar.png</File>
+    <File>C:/Users/limam/Documents/GitHub/MarioWorldSharp/MarioWorldSharp/Content/../assets/font/debug.spritefont</File>
+    <File>C:/Users/limam/Documents/GitHub/MarioWorldSharp/MarioWorldSharp/Content/../assets/image/map16/grass1.png</File>
+    <File>C:/Users/limam/Documents/GitHub/MarioWorldSharp/MarioWorldSharp/Content/../assets/image/map16/grass2.png</File>
   </SourceFiles>
   <DestFiles>
     <File>assets/font/debug.spritefont</File>
     <File>assets/image/map16/grass1.png</File>
     <File>assets/image/map16/grass2.png</File>
-    <File>assets/image/player/small/backward.png</File>
-    <File>assets/image/player/small/duck.png</File>
-    <File>assets/image/player/small/fall.png</File>
-    <File>assets/image/player/small/fastjump.png</File>
-    <File>assets/image/player/small/fastrun1.png</File>
-    <File>assets/image/player/small/fastrun2.png</File>
-    <File>assets/image/player/small/forward.png</File>
-    <File>assets/image/player/small/idle.png</File>
-    <File>assets/image/player/small/jump.png</File>
-    <File>assets/image/player/small/lookup.png</File>
-    <File>assets/image/player/small/run.png</File>
-    <File>assets/image/player/small/skid.png</File>
-    <File>assets/image/ui/uichar.png</File>
   </DestFiles>
 </SourceFileCollection>

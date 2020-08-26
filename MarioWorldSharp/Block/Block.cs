@@ -11,9 +11,9 @@ using MonoGame;
 
 using MarioWorldSharp.Sprite;
 
-namespace MarioWorldSharp.Block
+namespace MarioWorldSharp.Blocks
 {
-    public abstract class AbstractBlock
+    public abstract class Block
     {
         public virtual void Above(Player p, double x, double y) {}
         public virtual void Bellow(Player p, double x, double y) {}

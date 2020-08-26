@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace MarioWorldSharp.Block
+namespace MarioWorldSharp.Blocks
 {
     public class Blocks
     {
-        public static readonly AbstractBlock LEDGE_BLOCK = new Ledge();
-        public static readonly AbstractBlock SOLID_BLOCK = new SolidBlock();
-        public static readonly AbstractBlock EMPTY_BLOCK = new PassThroughBlock();
+        public static readonly Block LEDGE_BLOCK = new Ledge();
+        public static readonly Block SOLID_BLOCK = new SolidBlock();
+        public static readonly Block EMPTY_BLOCK = new PassThroughBlock();
     }
 }

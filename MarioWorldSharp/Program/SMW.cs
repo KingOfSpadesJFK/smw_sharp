@@ -13,7 +13,8 @@ using MarioWorldSharp.Sprite;
 using KdTree;
 using KdTree.Math;
 using System.Linq;
-using static MarioWorldSharp.Level;
+using MarioWorldSharp.Levels;
+using System.Runtime.InteropServices;
 
 namespace MarioWorldSharp
 {
@@ -59,6 +60,30 @@ namespace MarioWorldSharp
             InputEvent.DEBUG_ShowHitboxEvent += ShowHitbox;
             InputEvent.DEBUG_PrintSpriteTreeEvent += PrintSpriteTree;
             InputEvent.DEBUG_KillAllSpritesEvent += SpriteHandler.KillSprites;
+            InputEvent.DEBUG_ResetLevelEvent += ResetLevel;
+        }
+
+        private void ResetLevel(object sender, EventArgs e)
+        {
+            SpriteHandler.KillSprites(sender, e);
+            Character = new Player();
+            Character.Poses[0] = GraphicsHandler.SmallPlayerGraphics[0];
+            Character.Poses[1] = GraphicsHandler.SmallPlayerGraphics[1];
+            Character.Poses[2] = Character.Poses[1];
+            Character.Poses[3] = GraphicsHandler.SmallPlayerGraphics[2];
+            Character.Poses[4] = GraphicsHandler.SmallPlayerGraphics[3];
+            Character.Poses[5] = GraphicsHandler.SmallPlayerGraphics[4];
+            Character.Poses[6] = Character.Poses[5];
+            Character.Poses[0x0B] = GraphicsHandler.SmallPlayerGraphics[5];
+            Character.Poses[0x0C] = GraphicsHandler.SmallPlayerGraphics[6];
+            Character.Poses[0x0D] = GraphicsHandler.SmallPlayerGraphics[7];
+            Character.Poses[0x0F] = GraphicsHandler.SmallPlayerGraphics[8];
+            Character.Poses[0x24] = GraphicsHandler.SmallPlayerGraphics[9];
+            Character.Poses[0x39] = GraphicsHandler.SmallPlayerGraphics[10];
+            Character.Poses[0x3C] = GraphicsHandler.SmallPlayerGraphics[11];
+            Level = new Level();
+            Level.SpawnSprites();
+            Console.WriteLine(SpriteHandler.GetSpriteTree());
         }
 
         private void PrintSpriteTree(object sender, EventArgs e)
@@ -97,25 +122,25 @@ namespace MarioWorldSharp
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // TODO: use this.Content to load your game content here
+            GraphicsHandler.ImportIndexedPlayerGraphics(spriteBatch, Program.ExtractEmbeddedBin("assets.image.snes.GFX00_Player.bin"));
+
             Texture2D[] smallPoses;
             Texture2D map16_page1;
             Texture2D map16_page2;
-            smallPoses = new Texture2D[70];
-            smallPoses[0] = Content.Load<Texture2D>("assets\\image\\player\\small\\idle");
-            smallPoses[1] = Content.Load<Texture2D>("assets\\image\\player\\small\\run");
-            smallPoses[2] = smallPoses[1];
-            smallPoses[3] = Content.Load<Texture2D>("assets\\image\\player\\small\\lookup");
-            smallPoses[4] = Content.Load<Texture2D>("assets\\image\\player\\small\\fastrun1");
-            smallPoses[5] = Content.Load<Texture2D>("assets\\image\\player\\small\\fastrun2");
-            smallPoses[6] = smallPoses[5];
-            smallPoses[0x0B] = Content.Load<Texture2D>("assets\\image\\player\\small\\jump");
-            smallPoses[0x0C] = Content.Load<Texture2D>("assets\\image\\player\\small\\fastjump");
-            smallPoses[0x0D] = Content.Load<Texture2D>("assets\\image\\player\\small\\skid");
-            smallPoses[0x0F] = Content.Load<Texture2D>("assets\\image\\player\\small\\forward");
-            smallPoses[0x24] = Content.Load<Texture2D>("assets\\image\\player\\small\\fall");
-            smallPoses[0x39] = Content.Load<Texture2D>("assets\\image\\player\\small\\backward");
-            smallPoses[0x3C] = Content.Load<Texture2D>("assets\\image\\player\\small\\duck");
-            Character.Poses = smallPoses;
+            Character.Poses[0] = GraphicsHandler.SmallPlayerGraphics[0];
+            Character.Poses[1] = GraphicsHandler.SmallPlayerGraphics[1];
+            Character.Poses[2] = Character.Poses[1];
+            Character.Poses[3] = GraphicsHandler.SmallPlayerGraphics[2];
+            Character.Poses[4] = GraphicsHandler.SmallPlayerGraphics[3];
+            Character.Poses[5] = GraphicsHandler.SmallPlayerGraphics[4];
+            Character.Poses[6] = Character.Poses[5];
+            Character.Poses[0x0B] = GraphicsHandler.SmallPlayerGraphics[5];
+            Character.Poses[0x0C] = GraphicsHandler.SmallPlayerGraphics[6];
+            Character.Poses[0x0D] = GraphicsHandler.SmallPlayerGraphics[7];
+            Character.Poses[0x0F] = GraphicsHandler.SmallPlayerGraphics[8];
+            Character.Poses[0x24] = GraphicsHandler.SmallPlayerGraphics[9];
+            Character.Poses[0x39] = GraphicsHandler.SmallPlayerGraphics[10];
+            Character.Poses[0x3C] = GraphicsHandler.SmallPlayerGraphics[11];
             map16_page1 = Content.Load<Texture2D>("assets\\image\\map16\\grass1");
             map16_page2 = Content.Load<Texture2D>("assets\\image\\map16\\grass2");
             debugFont = Content.Load<SpriteFont>("assets\\font\\debug");
@@ -155,6 +180,11 @@ namespace MarioWorldSharp
         protected override void UnloadContent()
         {
             // TODO: Unload any non ContentManager content here
+        }
+
+        protected new void Exit()
+        {
+            base.Exit();
         }
 
         /// <summary>
@@ -368,7 +398,7 @@ namespace MarioWorldSharp
             base.Draw(gameTime);
         }
 
-        public Color[] GetImageData(Color[] colorData, int width, Rectangle rectangle)
+        public static Color[] GetImageData(Color[] colorData, int width, Rectangle rectangle)
         {
             Color[] color = new Color[rectangle.Width * rectangle.Height];
             for (int x = 0; x < rectangle.Width; x++)

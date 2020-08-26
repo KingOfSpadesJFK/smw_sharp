@@ -10,16 +10,17 @@ namespace MarioWorldSharp
     {
         public event EventHandler JumpPressEvent;
         public event EventHandler SpinPressEvent;
-        public event EventHandler JumpDownEvent;
-        public event EventHandler SpinDownEvent;
         public event EventHandler DashPressEvent;
+
         public event EventHandler UpPressEvent;
         public event EventHandler DownPressEvent;
         public event EventHandler LeftPressEvent;
         public event EventHandler RightPressEvent;
+
         public event EventHandler DEBUG_ShowHitboxEvent;
         public event EventHandler DEBUG_PrintSpriteTreeEvent;
         public event EventHandler DEBUG_KillAllSpritesEvent;
+        public event EventHandler DEBUG_ResetLevelEvent;
         public void Process()
         {
             if (Input.Jump.IsKeyPressed())
@@ -27,17 +28,16 @@ namespace MarioWorldSharp
             if (Input.Spinjump.IsKeyPressed())
                 SpinPressEvent.Invoke(this, EventArgs.Empty);
 
-            if (Input.Jump.IsKeyHeld())
-                JumpDownEvent.Invoke(this, EventArgs.Empty);
-            if (Input.Spinjump.IsKeyHeld())
-                SpinDownEvent.Invoke(this, EventArgs.Empty);
-
             if (Input.ShowHitboxes.IsKeyPressed())
                 DEBUG_ShowHitboxEvent.Invoke(this, EventArgs.Empty);
             if (Input.DEBUG_PrintSpriteTree.IsKeyPressed())
                 DEBUG_PrintSpriteTreeEvent.Invoke(this, EventArgs.Empty);
             if (Input.DEBUG_KillAllSprites.IsKeyPressed())
                 DEBUG_KillAllSpritesEvent.Invoke(this, EventArgs.Empty);
+            if (Input.DEBUG_ResetLevel.IsKeyPressed())
+                DEBUG_ResetLevelEvent.Invoke(this, EventArgs.Empty);
+
+
         }
     }
     public class Input
@@ -168,6 +168,14 @@ namespace MarioWorldSharp
             Inputs = new IInputWrapper[]
             {
                 new KeyWrapper(Keys.K)
+            }
+        };
+        public static Input DEBUG_ResetLevel = new Input
+        {
+            Name = "DEBUG_ResetLevel",
+            Inputs = new IInputWrapper[]
+            {
+                new KeyWrapper(Keys.R)
             }
         };
 

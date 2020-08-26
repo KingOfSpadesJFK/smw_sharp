@@ -1,19 +1,129 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <PublishReadyToRun>false</PublishReadyToRun>
     <TieredCompilation>false</TieredCompilation>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Icon.ico</ApplicationIcon>
+    <Authors>KingOfSpades</Authors>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="assets\image\snes\GFX00_Player.bin" />
+    <None Remove="assets\image\snes\GFX01_Animation.bin" />
+    <None Remove="assets\image\snes\GFX02_GenericSprites1.bin" />
+    <None Remove="assets\image\snes\GFX03_GenericSprites2.bin" />
+    <None Remove="assets\image\snes\GFX04_ForestSprites.bin" />
+    <None Remove="assets\image\snes\GFX05_CastleSprites2.bin" />
+    <None Remove="assets\image\snes\GFX06_CaveSprites.bin" />
+    <None Remove="assets\image\snes\GFX07_MushroomSprites.bin" />
+    <None Remove="assets\image\snes\GFX08_WaterSprites.bin" />
+    <None Remove="assets\image\snes\GFX09_GhostHouseTiles.bin" />
+    <None Remove="assets\image\snes\GFX0A_SwitchPalaceTiles.bin" />
+    <None Remove="assets\image\snes\GFX0B_PokeySumoMoleSprites.bin" />
+    <None Remove="assets\image\snes\GFX0C_LemmyWendySprites.bin" />
+    <None Remove="assets\image\snes\GFX0D_LudwigMortonRoySprites.bin" />
+    <None Remove="assets\image\snes\GFX0E_GhostHouseCaveBG.bin" />
+    <None Remove="assets\image\snes\GFX0F_Peach.bin" />
+    <None Remove="assets\image\snes\GFX10_DiscoNinjiSprites_PeachEnd.bin" />
+    <None Remove="assets\image\snes\GFX11_YoshiHouseSprites.bin" />
+    <None Remove="assets\image\snes\GFX12_PlayerOverworldSprites.bin" />
+    <None Remove="assets\image\snes\GFX13_GhostHouseSprites.bin" />
+    <None Remove="assets\image\snes\GFX14_CastleSprites1.bin" />
+    <None Remove="assets\image\snes\GFX15_GenericSprites3.bin" />
+    <None Remove="assets\image\snes\GFX16_GenericTiles1_OverworldAnimation.bin" />
+    <None Remove="assets\image\snes\GFX17_GrassTiles.bin" />
+    <None Remove="assets\image\snes\GFX18_RopeTiles.bin" />
+    <None Remove="assets\image\snes\GFX19_GenericTiles2.bin" />
+    <None Remove="assets\image\snes\GFX1A_CastleTiles.bin" />
+    <None Remove="assets\image\snes\GFX1B_ForestHillsBG.bin" />
+    <None Remove="assets\image\snes\GFX1C_CaveTiles.bin" />
+    <None Remove="assets\image\snes\GFX1D_DottedHillsCastle1BG.bin" />
+    <None Remove="assets\image\snes\GFX1E_OverworldTiles1.bin" />
+    <None Remove="assets\image\snes\GFX1F_OverworldTiles2.bin" />
+    <None Remove="assets\image\snes\GFX20_OverworldTiles3.bin" />
+    <None Remove="assets\image\snes\GFX21_ForestCloudTiles.bin" />
+    <None Remove="assets\image\snes\GFX22_BanzaiBillSprites.bin" />
+    <None Remove="assets\image\snes\GFX23_Bowser.bin" />
+    <None Remove="assets\image\snes\GFX24_BossBackgrounds.bin" />
+    <None Remove="assets\image\snes\GFX25_DinoRhino.bin" />
+    <None Remove="assets\image\snes\GFX26_BowserBattleSprites.bin" />
+    <None Remove="assets\image\snes\GFX27_IggyLarryReznor.bin" />
+    <None Remove="assets\image\snes\GFX28_YoshiEndingSprites.bin" />
+    <None Remove="assets\image\snes\GFX29_Mode7.bin" />
+    <None Remove="assets\image\snes\GFX2A_Layer3Tiles1.bin" />
+    <None Remove="assets\image\snes\GFX2B_Layer3Tiles2.bin" />
+    <None Remove="assets\image\snes\GFX2C_Layer3Tiles3.bin" />
+    <None Remove="assets\image\snes\GFX2D_Layer3Tiles4.bin" />
+    <None Remove="assets\image\snes\GFX2E_CastleCutsceneTiles1.bin" />
+    <None Remove="assets\image\snes\GFX2F_CastleCutsceneTiles2.bin" />
+    <None Remove="assets\image\snes\GFX30_ThankYouTiles.bin" />
+    <None Remove="assets\image\snes\GFX31_CreditsFont.bin" />
+    <None Remove="assets\image\snes\GFX32_MarioLuigiEndScreen.bin" />
+    <None Remove="assets\image\snes\GFX33_SpecialWorldSprites.bin" />
     <None Remove="Icon.ico" />
     <None Remove="Icon.bmp" />
+    <None Remove="Level\Levels\0\Level.json" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Level\Levels\0\Level.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="assets\image\snes\GFX00_Player.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX01_Animation.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX02_GenericSprites1.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX03_GenericSprites2.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX04_ForestSprites.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX05_CastleSprites2.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX06_CaveSprites.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX07_MushroomSprites.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX08_WaterSprites.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX09_GhostHouseTiles.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX0A_SwitchPalaceTiles.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX0B_PokeySumoMoleSprites.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX0C_LemmyWendySprites.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX0D_LudwigMortonRoySprites.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX0E_GhostHouseCaveBG.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX0F_Peach.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX10_DiscoNinjiSprites_PeachEnd.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX11_YoshiHouseSprites.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX12_PlayerOverworldSprites.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX13_GhostHouseSprites.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX14_CastleSprites1.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX15_GenericSprites3.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX16_GenericTiles1_OverworldAnimation.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX17_GrassTiles.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX18_RopeTiles.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX19_GenericTiles2.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX1A_CastleTiles.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX1B_ForestHillsBG.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX1C_CaveTiles.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX1D_DottedHillsCastle1BG.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX1E_OverworldTiles1.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX1F_OverworldTiles2.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX20_OverworldTiles3.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX21_ForestCloudTiles.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX22_BanzaiBillSprites.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX23_Bowser.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX24_BossBackgrounds.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX25_DinoRhino.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX26_BowserBattleSprites.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX27_IggyLarryReznor.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX28_YoshiEndingSprites.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX29_Mode7.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX2A_Layer3Tiles1.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX2B_Layer3Tiles2.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX2C_Layer3Tiles3.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX2D_Layer3Tiles4.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX2E_CastleCutsceneTiles1.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX2F_CastleCutsceneTiles2.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX30_ThankYouTiles.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX31_CreditsFont.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX32_MarioLuigiEndScreen.bin" />
+    <EmbeddedResource Include="assets\image\snes\GFX33_SpecialWorldSprites.bin" />
     <EmbeddedResource Include="Icon.ico" />
     <EmbeddedResource Include="Icon.bmp" />
   </ItemGroup>
@@ -26,11 +136,16 @@
   <ItemGroup>
     <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.0.1641" />
     <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.0.1641" />
+    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
     <PackageReference Include="System.Collections.NonGeneric" Version="4.3.0" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Libraries\" />
+    <Folder Include="Object\" />
     <Folder Include="Utilities\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\.editorconfig" Link=".editorconfig" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="KdTreeLib">
