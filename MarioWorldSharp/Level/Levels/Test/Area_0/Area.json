@@ -1,0 +1,27 @@
+{
+  "PlayerEnterance": [ 0.0, 0.0 ],
+  "TileGraphics": [
+    "assets.image.snes.GFX16_GenericTiles1_OverworldAnimation.bin"
+  ],
+  "Objects": [
+    {
+      "ID": "Ledge",
+      "X": 0,
+      "Y": 11,
+      "Width": 256,
+      "Height": 4
+    }
+  ],
+  "MidwayEnterances": [
+    {
+      "X": 2048.0,
+      "Y": 0.0
+    }
+  ],
+  "SecondaryEnterances": [
+    {
+      "X": 348.0,
+      "Y": 47.0
+    }
+  ]
+}

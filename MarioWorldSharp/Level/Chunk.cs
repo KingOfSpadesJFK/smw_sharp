@@ -10,27 +10,51 @@ namespace MarioWorldSharp.Levels
     public class Chunk
     {
         private short[,] map16;
+        public int X { get; set; }
+        public int Y { get; set; }
 
-        public Chunk()
-        {
-            map16 = new short[16, 16];
-            for (int i = 0; i < map16.GetLength(1); i++)
-            {
-                for (int j = 0; j < map16.GetLength(0); j++)
-                {
-                    if (i < 11)
-                        map16[j, i] = 0x25;
-                    else if (i == 11)
-                        map16[j, i] = 0x100;
-                    else
-                        map16[j, i] = 0x3F;
-                }
-            }
-        }
+        readonly short EmptyBlock = 0x25;
+
+        public Chunk() : this(0) {}
 
         public Chunk(short[,] chunk)
         {
-            map16 = chunk;
+            if (chunk.GetLength(0) == 16 && chunk.GetLength(1) == 16)
+                map16 = chunk;
+            else
+                throw new IndexOutOfRangeException();
+        }
+
+        /// <summary>
+        /// Generates a new chunk
+        /// </summary>
+        /// <param name="type">0: Empty chunk, 1: Ledge chunk</param>
+        public Chunk(int type)
+        {
+            map16 = new short[16, 16];
+            switch (type)
+            {
+                case 1:
+                    for (int i = 0; i < map16.GetLength(1); i++)
+                    {
+                        for (int j = 0; j < map16.GetLength(0); j++)
+                        {
+                            if (i < 11)
+                                map16[j, i] = EmptyBlock;
+                            else if (i == 11)
+                                map16[j, i] = 0x100;
+                            else
+                                map16[j, i] = 0x3F;
+                        }
+                    }
+                    break;
+
+                default:
+                    for (int i = 0; i < map16.GetLength(1); i++)
+                        for (int j = 0; j < map16.GetLength(0); j++)
+                            map16[j, i] = EmptyBlock;
+                    break;
+            }
         }
 
         public bool IsEmptyChunk()
@@ -46,15 +70,15 @@ namespace MarioWorldSharp.Levels
         public Block GetMap16(int x, int y)
         {
             if (map16 == null)
-                return Blocks.Blocks.EMPTY_BLOCK;
+                return Blocks.BlockList.EMPTY_BLOCK;
             if (x < 0 || x >= 16)
                 throw new IndexOutOfRangeException();
             if (y < 0 || y >= 16)
                 throw new IndexOutOfRangeException();
 
-            Block ret = BlockList.Map16[map16[x, y]];
+            Block ret = Map16BlockPointers.Map16[map16[x, y]];
             if (ret == null)
-                return Blocks.Blocks.EMPTY_BLOCK;
+                return Blocks.BlockList.EMPTY_BLOCK;
             return ret;
         }
 

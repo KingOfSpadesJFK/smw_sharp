@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MarioWorldSharp.Blocks
 {
-    public class Blocks
+    public class BlockList
     {
         public static readonly Block LEDGE_BLOCK = new Ledge();
         public static readonly Block SOLID_BLOCK = new SolidBlock();

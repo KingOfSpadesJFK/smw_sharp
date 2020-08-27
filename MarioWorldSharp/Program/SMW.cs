@@ -15,14 +15,20 @@ using KdTree.Math;
 using System.Linq;
 using MarioWorldSharp.Levels;
 using System.Runtime.InteropServices;
+using System.Reflection;
 
 namespace MarioWorldSharp
 {
+    public enum GameMode
+    { 
+        TitleScreen,
+        Level
+    }
+
     /// <summary>
     /// This is the main type for your game.
     /// </summary>
     /// 
-
     public class SMW : Game
     {
         GraphicsDeviceManager graphics;
@@ -32,10 +38,11 @@ namespace MarioWorldSharp
         Texture2D[] map16Textures;
         bool resChange;
         float scale;
+        bool spriteBatchActive;
 
         public static Player Character;
         public static Level Level;
-        public static int GameMode;
+        public static GameMode GameMode { get; set; }
         public static Color colorDisp;
 
         readonly int ResWidth = 400;
@@ -54,13 +61,10 @@ namespace MarioWorldSharp
             graphics.PreferredBackBufferHeight = (int) (ResHeight * scale);
             graphics.HardwareModeSwitch = false;
             Content.RootDirectory = "Content";
-            GameMode = 0;
+            GameMode = GameMode.TitleScreen;
             colorDisp = new Color();
 
-            InputEvent.DEBUG_ShowHitboxEvent += ShowHitbox;
-            InputEvent.DEBUG_PrintSpriteTreeEvent += PrintSpriteTree;
-            InputEvent.DEBUG_KillAllSpritesEvent += SpriteHandler.KillSprites;
-            InputEvent.DEBUG_ResetLevelEvent += ResetLevel;
+            InputEvent.JumpPressEvent += InitializeLevelMode;
         }
 
         private void ResetLevel(object sender, EventArgs e)
@@ -105,9 +109,6 @@ namespace MarioWorldSharp
         {
             // TODO: Add your initialization logic here
             Character = new Player();
-            Level = new Level();
-            Level.SpawnSprites();
-            Console.WriteLine(SpriteHandler.GetSpriteTree());
             gamescreen = new RenderTarget2D(graphics.GraphicsDevice, ResWidth, ResHeight, false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
             base.Initialize();
         }
@@ -124,7 +125,6 @@ namespace MarioWorldSharp
             // TODO: use this.Content to load your game content here
             GraphicsHandler.ImportIndexedPlayerGraphics(spriteBatch, Program.ExtractEmbeddedBin("assets.image.snes.GFX00_Player.bin"));
 
-            Texture2D[] smallPoses;
             Texture2D map16_page1;
             Texture2D map16_page2;
             Character.Poses[0] = GraphicsHandler.SmallPlayerGraphics[0];
@@ -199,15 +199,37 @@ namespace MarioWorldSharp
 
             // TODO: Add your update logic here
             InputEvent.Process();
-            LevelGameMode();
+            switch (GameMode)
+            {
+                case GameMode.TitleScreen:
+                    TitleScreen();
+                    break;
+                default:
+                    LevelGameMode();
+                    break;
+            }
             base.Update(gameTime);
 
             FrameTimer++;
         }
 
-        private void ShowHitbox(object sender, EventArgs e)
+        public void TitleScreen()
         {
-            drawCollision = !drawCollision;
+
+        }
+
+        private void InitializeLevelMode(object sender, EventArgs e)
+        {
+            InputEvent.DEBUG_ShowHitboxEvent += ShowHitbox;
+            InputEvent.DEBUG_PrintSpriteTreeEvent += PrintSpriteTree;
+            InputEvent.DEBUG_KillAllSpritesEvent += SpriteHandler.KillSprites;
+            InputEvent.DEBUG_ResetLevelEvent += ResetLevel;
+            InputEvent.JumpPressEvent -= InitializeLevelMode;
+
+            GameMode = GameMode.Level;
+            Level = new Level();
+            Level.SpawnSprites();
+            Console.WriteLine(SpriteHandler.GetSpriteTree());
         }
 
         private void LevelGameMode()
@@ -215,6 +237,11 @@ namespace MarioWorldSharp
             Character.Process();
             SpriteHandler.ProcessSprites();
             Level.Scroll(Character.XPosition, Character.YPosition);
+        }
+
+        private void ShowHitbox(object sender, EventArgs e)
+        {
+            drawCollision = !drawCollision;
         }
 
         public static bool SecondPassed { get => FrameTimer % 60L == 0; }
@@ -235,6 +262,8 @@ namespace MarioWorldSharp
             return (int)fps;
         }
 
+        private bool setWindow = false;
+
         /// <summary>
         /// This is called when the game should draw itself.
         /// </summary>
@@ -249,9 +278,6 @@ namespace MarioWorldSharp
                     graphics.ToggleFullScreen();
                 scale = 1;
                 resChange = true;
-                graphics.PreferredBackBufferWidth = (int)(ResWidth * scale);
-                graphics.PreferredBackBufferHeight = (int)(ResHeight * scale);
-                graphics.ApplyChanges();
             }
             else if (!resChange && key.IsKeyDown(Keys.D2))
             {
@@ -259,9 +285,6 @@ namespace MarioWorldSharp
                     graphics.ToggleFullScreen();
                 scale = 2;
                 resChange = true;
-                graphics.PreferredBackBufferWidth = (int)(ResWidth * scale);
-                graphics.PreferredBackBufferHeight = (int)(ResHeight * scale);
-                graphics.ApplyChanges();
             }
             else if (!resChange && key.IsKeyDown(Keys.D3))
             {
@@ -269,9 +292,6 @@ namespace MarioWorldSharp
                     graphics.ToggleFullScreen();
                 scale = 3;
                 resChange = true;
-                graphics.PreferredBackBufferWidth = (int)(ResWidth * scale);
-                graphics.PreferredBackBufferHeight = (int)(ResHeight * scale);
-                graphics.ApplyChanges();
             }
             else if (!resChange && key.IsKeyDown(Keys.D4))
             {
@@ -281,9 +301,6 @@ namespace MarioWorldSharp
                     scale = (int) (GraphicsDevice.DisplayMode.Height / ResHeightF);
 
                 resChange = true;
-                graphics.PreferredBackBufferWidth = GraphicsDevice.DisplayMode.Width;
-                graphics.PreferredBackBufferHeight = GraphicsDevice.DisplayMode.Height;
-                graphics.ApplyChanges();
                 if (!graphics.IsFullScreen)
                     graphics.ToggleFullScreen();
             }
@@ -295,9 +312,6 @@ namespace MarioWorldSharp
                     scale = (GraphicsDevice.DisplayMode.Height / ResHeightF);
 
                 resChange = true;
-                graphics.PreferredBackBufferWidth = GraphicsDevice.DisplayMode.Width;
-                graphics.PreferredBackBufferHeight = GraphicsDevice.DisplayMode.Height;
-                graphics.ApplyChanges();
                 if (!graphics.IsFullScreen)
                     graphics.ToggleFullScreen();
             }
@@ -305,46 +319,38 @@ namespace MarioWorldSharp
                 resChange = false;
             #endregion
 
+            if (!setWindow)
+            {
+                if (graphics.IsFullScreen)
+                {
+                    graphics.PreferredBackBufferWidth = GraphicsDevice.DisplayMode.Width;
+                    graphics.PreferredBackBufferHeight = GraphicsDevice.DisplayMode.Height;
+                    graphics.ApplyChanges();
+                }
+                else
+                {
+                    graphics.PreferredBackBufferWidth = (int)(ResWidth * scale);
+                    graphics.PreferredBackBufferHeight = (int)(ResHeight * scale);
+                    graphics.ApplyChanges();
+                }
+                setWindow = true;
+            }
+
             GraphicsDevice.SetRenderTarget(gamescreen);
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            spriteBatch.Begin();
+            ActivateSpriteBatch(false);
 
-            //Level Drawing
-            //TODO: Optimize routine
-            Level layer = Level;
-            while (layer != null)
+            switch (GameMode)
             {
-                short[,] leveldraw = layer.GetCameraSelection();
-                for (int i = 0; i < leveldraw.GetLength(0); i++)
-                {
-                    for (int j = 0; j < leveldraw.GetLength(1); j++)
-                    {
-                        spriteBatch.Draw(map16Textures[leveldraw[i, j]], new Vector2((int)-Level.X % 16 + (i * 16), (int)-Level.Y % 16 + (j * 16)), Color.White);
-                    }
-                }
-                layer = layer.GetNextLayer();
+                case GameMode.TitleScreen:
+                    TitleScreenDraw();
+                    break;
+                default:
+                    LevelModeDraw();
+                    break;
             }
-
-            //Draw Sprites
-            foreach (ISprite s in SpriteHandler.SpriteList)
-                s?.Draw(spriteBatch);
-
-            //Draw player
-            Character.Draw(spriteBatch);
-
-            if (drawCollision)
-            {
-                Texture2D box = CreateRectangleTexture(Character.GetCollisionBox(), new Color(64, 0, 0, 100), new Color(255, 45, 45, 100));
-                Texture2D cross = CreateCrossTexture(Color.Black);
-                spriteBatch.Draw(box, new Vector2(Character.GetCollisionBox().X - (int)Level.X, Character.GetCollisionBox().Y - (int)Level.Y), Color.White);
-                spriteBatch.Draw(cross, new Vector2((int)Character.XPosition - (int)Level.X - 1, (int)Character.YPosition - (int)Level.Y - 1), Color.White);
-                spriteBatch.End();
-                box.Dispose();
-                cross.Dispose();
-            }
-            else
-                spriteBatch.End();
+            ActivateSpriteBatch(true);
 
             float width = graphics.PreferredBackBufferWidth;
             float height = graphics.PreferredBackBufferHeight;
@@ -376,26 +382,101 @@ namespace MarioWorldSharp
                 spriteBatch.End();
             }
 
-            spriteBatch.Begin();
-            string debug = graphics.PreferredBackBufferWidth + "x" + graphics.PreferredBackBufferHeight + "\nScale: " + scale + ", True Scale: " + trueScale + "\n"
-                + $"{FPS(gameTime)}FPS \n"
-                + "Player: (" + Character.XPosition + ", " + Character.YPosition + ")\n"
-                + "Player (Integral): (" + (int)Character.XPosition + ", " + (int)Character.YPosition + ")\n"
-                + "Camera: (" + (int)Level.X + ", " + (int)Level.Y + ")\n"
-                + "Player Block Position: (" + (int)(Character.XPosition / 16) + ", " + (int)(Character.YPosition / 16) + ")\n"
-                + "Player Within Chunk: (" + (int) ((Character.XPosition / 16) % 16) + ", " + (int) ((Character.YPosition / 16) % 16) + ")\n"
-                + "Player Chunk: (" + (int)((Character.XPosition / 16) / 16) + ", " + (int)((Character.YPosition / 16) / 16) + ")\n"
-                + "Speed: (" + Character.XSpeed + "," + Character.YSpeed + ")\n"
-                + "Speed (SMW Units): (" + (int)(Character.XSpeed * 16.0) + "," + (int)(Character.YSpeed * 16.0) + ")\n"
-                + $"Called UpdateCollisionTree() {SpriteHandler.UpdateCalls} {(SpriteHandler.UpdateCalls == 1 ? "time" : "times")} this past second\n"
-                + $"Sprites in level: {Level.SpriteCount}\n"
-                + $"Sprites on screen: {SpriteHandler.SpriteCount}\n";
-            debug += SpriteHandler.SpriteLastSpawned != null ? $"Last sprite spawned: ({SpriteHandler.SpriteLastSpawned})\n" : "";
-            debug += SpriteHandler.SpriteLastDepawned != null ? $"Last sprite disposed: ({SpriteHandler.SpriteLastDepawned})\n" : "";
-            spriteBatch.DrawString(debugFont, debug, Vector2.Zero, Color.White);
-            spriteBatch.End();
+            if (GameMode != GameMode.TitleScreen)
+            {
+                spriteBatch.Begin();
+                string debug = graphics.PreferredBackBufferWidth + "x" + graphics.PreferredBackBufferHeight + "\nScale: " + scale + ", True Scale: " + trueScale + "\n"
+                    + $"{FPS(gameTime)}FPS \n"
+                    + "Player: (" + Character.XPosition + ", " + Character.YPosition + ")\n"
+                    + "Player (Integral): (" + (int)Character.XPosition + ", " + (int)Character.YPosition + ")\n"
+                    + $"Camera: ({(int)Level?.X}, {(int)Level?.Y})\n"
+                    + "Player Block Position: (" + (int)(Character.XPosition / 16) + ", " + (int)(Character.YPosition / 16) + ")\n"
+                    + "Player Within Chunk: (" + (int)((Character.XPosition / 16) % 16) + ", " + (int)((Character.YPosition / 16) % 16) + ")\n"
+                    + "Player Chunk: (" + (int)((Character.XPosition / 16) / 16) + ", " + (int)((Character.YPosition / 16) / 16) + ")\n"
+                    + "Speed: (" + Character.XSpeed + "," + Character.YSpeed + ")\n"
+                    + "Speed (SMW Units): (" + (int)(Character.XSpeed * 16.0) + "," + (int)(Character.YSpeed * 16.0) + ")\n"
+                    + $"Called UpdateCollisionTree() {SpriteHandler.UpdateCalls} {(SpriteHandler.UpdateCalls == 1 ? "time" : "times")} this past second\n"
+                    + $"Sprites in level: {Level?.SpriteCount}\n"
+                    + $"Sprites on screen: {SpriteHandler.SpriteCount}\n";
+                debug += SpriteHandler.SpriteLastSpawned != null ? $"Last sprite spawned: ({SpriteHandler.SpriteLastSpawned})\n" : "";
+                debug += SpriteHandler.SpriteLastDepawned != null ? $"Last sprite disposed: ({SpriteHandler.SpriteLastDepawned})\n" : "";
+                spriteBatch.DrawString(debugFont, debug, Vector2.Zero, Color.White);
+                spriteBatch.End();
+            }
 
             base.Draw(gameTime);
+        }
+
+        private void ActivateSpriteBatch(bool deactivate)
+        {
+            switch (deactivate)
+            {
+                case false:
+                    if (!spriteBatchActive)
+                    {
+                        spriteBatch.Begin();
+                        spriteBatchActive = true;
+                    }
+                    break;
+                case true:
+                    if (spriteBatchActive)
+                    {
+                        spriteBatch.End();
+                        spriteBatchActive = false;
+                    }
+                    break;
+            }
+        }
+
+        private void TitleScreenDraw()
+        {
+            string title = "SMW# by the King of Spades";
+            Vector2 center = CenterString(title);
+
+            spriteBatch.DrawString(debugFont, title, center, Color.White);
+        }
+
+        public Vector2 CenterString(string s)
+        {
+            Vector2 size = debugFont.MeasureString(s);
+            return new Vector2(200 - size.X / 2, 112 - size.Y / 2);
+        }
+
+        private void LevelModeDraw()
+        {
+            //Level Drawing
+            //TODO: Optimize routine
+            Level layer = Level;
+            while (layer != null)
+            {
+                short[,] leveldraw = layer.GetCameraSelection();
+                for (int i = 0; i < leveldraw.GetLength(0); i++)
+                {
+                    for (int j = 0; j < leveldraw.GetLength(1); j++)
+                    {
+                        spriteBatch.Draw(map16Textures[leveldraw[i, j]], new Vector2((int)-Level.X % 16 + (i * 16), (int)-Level.Y % 16 + (j * 16)), Color.White);
+                    }
+                }
+                layer = layer.GetNextLayer();
+            }
+
+            //Draw Sprites
+            foreach (ISprite s in SpriteHandler.SpriteList)
+                s?.Draw(spriteBatch);
+
+            //Draw player
+            Character.Draw(spriteBatch);
+
+            if (drawCollision)
+            {
+                Texture2D box = CreateRectangleTexture(Character.GetCollisionBox(), new Color(64, 0, 0, 100), new Color(255, 45, 45, 100));
+                Texture2D cross = CreateCrossTexture(Color.Black);
+                spriteBatch.Draw(box, new Vector2(Character.GetCollisionBox().X - (int)Level.X, Character.GetCollisionBox().Y - (int)Level.Y), Color.White);
+                spriteBatch.Draw(cross, new Vector2((int)Character.XPosition - (int)Level.X - 1, (int)Character.YPosition - (int)Level.Y - 1), Color.White);
+                ActivateSpriteBatch(true);
+                box.Dispose();
+                cross.Dispose();
+            }
         }
 
         public static Color[] GetImageData(Color[] colorData, int width, Rectangle rectangle)

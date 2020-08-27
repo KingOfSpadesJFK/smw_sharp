@@ -10,6 +10,9 @@ using System.Text;
 
 namespace MarioWorldSharp
 {
+    /// <summary>
+    /// A class with a 8-bit color indexed texture where each pixel points to a specific color passed into the texture
+    /// </summary>
     public class IndexedTexture
     {
         public byte[] ColorData { get; set; }
@@ -48,6 +51,21 @@ namespace MarioWorldSharp
     {
         private static Texture2D[] _smallPlayer = new Texture2D[70];
         public static Texture2D[] SmallPlayerGraphics { get => _smallPlayer; }
+
+        public static Color[] ConvertIndexedTexture(IndexedTexture t)
+        {
+            Color[] ret = new Color[t.ColorData.Length];
+
+            for (int i = 0; i < t.Height * t.Width; i += t.Width)
+            {
+                for (int j = 0; j < t.Width; j++)
+                {
+                    int b = t.ColorData[i + j];
+                    ret[i + j] = t.Palette[b];
+                }
+            }
+            return ret;
+        }
 
         /// <summary>
         /// Used to import graphics with 8-bit indexed colors (Same format as 8bpp Mode 7 SNES graphics)

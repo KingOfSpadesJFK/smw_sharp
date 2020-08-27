@@ -66,10 +66,14 @@
     <None Remove="assets\image\snes\GFX33_SpecialWorldSprites.bin" />
     <None Remove="Icon.ico" />
     <None Remove="Icon.bmp" />
-    <None Remove="Level\Levels\0\Level.json" />
+    <None Remove="Level\Levels\Test\Area_0\Area.json" />
+    <None Remove="Level\Levels\Test\Level.json" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Level\Levels\0\Level.json" />
+    <EmbeddedResource Include="Level\Levels\Test\Area_0\Area.json" />
+    <EmbeddedResource Include="Level\Levels\Test\Level.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="assets\image\snes\GFX00_Player.bin" />
@@ -141,7 +145,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Libraries\" />
-    <Folder Include="Object\" />
     <Folder Include="Utilities\" />
   </ItemGroup>
   <ItemGroup>

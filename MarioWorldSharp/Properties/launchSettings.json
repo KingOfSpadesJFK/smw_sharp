@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "MarioWorldSharp": {
+      "commandName": "Project",
+      "commandLineArgs": "-c"
+    }
+  }
+}

@@ -13,6 +13,8 @@ using MarioWorldSharp.Sprite;
 using KdTree;
 using KdTree.Math;
 using System.Reflection.Metadata.Ecma335;
+using System.Diagnostics.CodeAnalysis;
+using System.Collections;
 
 namespace MarioWorldSharp.Levels
 {
@@ -48,8 +50,11 @@ namespace MarioWorldSharp.Levels
 
         private Level nextLayer;
         private Level prevLayer;
-        private int width;
-        private int height;
+        private int _width;
+        private int _height;
+        public int Width { get => _width; }
+        public int Height { get => _height; }
+
         private double XScrollMultiplier;
         private double YScrollMultiplier;
 
@@ -58,11 +63,16 @@ namespace MarioWorldSharp.Levels
 
         public Level()
         {
-            chunks = new Chunk[16, 1];
-            for (int i = 0; i < chunks.GetLength(0); i++)
-                chunks[i, 0] = new Chunk();
-            width = chunks.GetLength(0) * 16;
-            height = chunks.GetLength(1) * 16;
+            FormChunks(new Ledge() 
+            { 
+                X = 0,
+                Y = 11, 
+                Width = 256, 
+                Height = 4 
+            });
+
+            _width = chunks.GetLength(0) * 16;
+            _height = chunks.GetLength(1) * 16;
             Sprites = new KdTree<double, SpriteData>(2, new DoubleMath());
             _SpriteCount = 0;
             X = 0; Y = 0;
@@ -98,7 +108,7 @@ namespace MarioWorldSharp.Levels
             chunk[11, 9] = 0x130;
 
             Random rand = new Random();
-            for (double i = 0; i < width * 16; i += 24)
+            for (double i = 0; i < _width * 16; i += 24)
                 AddSprite(i, 60, SpriteID.GreenShellessKoopa);
             Sprites.Balance();
 
@@ -124,10 +134,10 @@ namespace MarioWorldSharp.Levels
                 newX = 0;
             if (newY < 0)
                 newY = 0;
-            if (newX >= width * 16 - 400)
-                newX = width * 16 - 401;
-            if (newY >= height * 16 - 224)
-                newY = height * 16 - 225;
+            if (newX >= _width * 16 - 400)
+                newX = _width * 16 - 401;
+            if (newY >= _height * 16 - 224)
+                newY = _height * 16 - 225;
 
             if (newX > X)
                 scrollingHorz = 1;
@@ -143,6 +153,48 @@ namespace MarioWorldSharp.Levels
             else
                 scrollingVert = 0;
             X = newX; Y = newY;
+        }
+
+        private void FormChunks(params ILevelObject[] objects)
+        {
+            int minX = int.MaxValue;
+            int minY = int.MaxValue;
+            int totalWidth = 0;
+            int totalHeight = 0;
+
+            foreach(ILevelObject o in objects)
+            {
+                minX = o.X < minX ? o.X : minX;
+                minY = o.Y < minY ? o.Y : minY;
+            }
+            foreach(ILevelObject o in objects)
+            {
+                int rX = o.X - minX;
+                int rY = o.Y - minY;
+                totalWidth = rX + o.Width > totalWidth ? rX + o.Width : totalWidth;
+                totalHeight = rY + o.Height > totalHeight ? rY + o.Height : totalHeight;
+            }
+
+            int chunkArrayWidth = (int)Math.Ceiling( (double)(minX + totalWidth) / 16.0 );
+            int chunkArrayHeight = (int)Math.Ceiling( (double)(minY + totalHeight) / 16.0 );
+            chunks = new Chunk[chunkArrayWidth, chunkArrayHeight];
+            foreach (ILevelObject o in objects)
+            {
+                short[,] build = o.Build();
+                for (int i = 0; i < build.GetLength(1); i++)
+                {
+                    for (int j = 0; j < build.GetLength(0); j++)
+                    {
+                        int x = j + o.X;
+                        int y = i + o.Y;
+
+                        if (chunks[x / 16, y / 16] == null)
+                            chunks[x / 16, y / 16] = new Chunk() { X = x / 16, Y = y / 16 };
+
+                        chunks[x / 16, y / 16].GetMap16Array()[x % 16, y % 16] = build[j, i];
+                    }
+                }
+            }
         }
 
         public Level(Chunk[,] Level)
@@ -175,10 +227,10 @@ namespace MarioWorldSharp.Levels
                     if (getY < 0)
                         getY = 0;
 
-                    if (getX >= width)
-                        getX = width - 1;
-                    if (getY >= height)
-                        getY = height - 1;
+                    if (getX >= _width)
+                        getX = _width - 1;
+                    if (getY >= _height)
+                        getY = _height - 1;
 
                     if (chunks[getX / 16, getY / 16] == null)
                         ret[i, j] = 0x25;
@@ -191,15 +243,18 @@ namespace MarioWorldSharp.Levels
 
         public Block GetMap16(int x, int y)
         {
-            if (x >= width)
-                x = width - 1;
-            if (y >= height)
-                y = height - 1;
+            if (x >= _width)
+                x = _width - 1;
+            if (y >= _height)
+                y = _height - 1;
 
             if (x < 0)
                 x = 0;
             if (y < 0)
                 y = 0;
+
+            if (chunks[x / 16, y / 16] == null)
+                return BlockList.EMPTY_BLOCK;
 
             return chunks[x / 16, y / 16].GetMap16(x % 16, y % 16);
         }
@@ -293,7 +348,7 @@ namespace MarioWorldSharp.Levels
         }
     }
     
-    public static class BlockList
+    public static class Map16BlockPointers
     {
         public static Block[] Map16 =
         {
@@ -314,10 +369,10 @@ namespace MarioWorldSharp.Levels
             null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
             null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
 
-            Blocks.Blocks.LEDGE_BLOCK, Blocks.Blocks.LEDGE_BLOCK, Blocks.Blocks.LEDGE_BLOCK, Blocks.Blocks.LEDGE_BLOCK, Blocks.Blocks.LEDGE_BLOCK, Blocks.Blocks.LEDGE_BLOCK, Blocks.Blocks.LEDGE_BLOCK, Blocks.Blocks.LEDGE_BLOCK, Blocks.Blocks.LEDGE_BLOCK, Blocks.Blocks.LEDGE_BLOCK, Blocks.Blocks.LEDGE_BLOCK, Blocks.Blocks.LEDGE_BLOCK, Blocks.Blocks.LEDGE_BLOCK, Blocks.Blocks.LEDGE_BLOCK, Blocks.Blocks.LEDGE_BLOCK, Blocks.Blocks.LEDGE_BLOCK,
+            Blocks.BlockList.LEDGE_BLOCK, Blocks.BlockList.LEDGE_BLOCK, Blocks.BlockList.LEDGE_BLOCK, Blocks.BlockList.LEDGE_BLOCK, Blocks.BlockList.LEDGE_BLOCK, Blocks.BlockList.LEDGE_BLOCK, Blocks.BlockList.LEDGE_BLOCK, Blocks.BlockList.LEDGE_BLOCK, Blocks.BlockList.LEDGE_BLOCK, Blocks.BlockList.LEDGE_BLOCK, Blocks.BlockList.LEDGE_BLOCK, Blocks.BlockList.LEDGE_BLOCK, Blocks.BlockList.LEDGE_BLOCK, Blocks.BlockList.LEDGE_BLOCK, Blocks.BlockList.LEDGE_BLOCK, Blocks.BlockList.LEDGE_BLOCK,
             null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
             null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
-            Blocks.Blocks.SOLID_BLOCK, null, null, Blocks.Blocks.SOLID_BLOCK, Blocks.Blocks.SOLID_BLOCK, Blocks.Blocks.SOLID_BLOCK, Blocks.Blocks.SOLID_BLOCK, null, null, null, null, null, null, null, null, null,
+            Blocks.BlockList.SOLID_BLOCK, null, null, Blocks.BlockList.SOLID_BLOCK, Blocks.BlockList.SOLID_BLOCK, Blocks.BlockList.SOLID_BLOCK, Blocks.BlockList.SOLID_BLOCK, null, null, null, null, null, null, null, null, null,
             null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
             null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
             null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,

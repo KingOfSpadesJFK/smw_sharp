@@ -36,7 +36,7 @@ namespace MarioWorldSharp
         [STAThread]
         static void Main(string[] args)
         {
-            if (showConsole)
+            if (args.Length > 0 && args[0] == "-c")
             {
                 AllocConsole();
                 IntPtr stdHandle = GetStdHandle(STD_OUTPUT_HANDLE);

@@ -10,12 +10,12 @@ namespace MarioWorldSharp.Blocks
         public override void Bellow(Player p, double x, double y)
         {
             if (p.YSpeed > 0 && y % 16.0 <= 8.0)
-                Blocks.SOLID_BLOCK.Bellow(p, x, y);
+                BlockList.SOLID_BLOCK.Bellow(p, x, y);
         }
         public override void Bellow(ISprite p, double x, double y)
         {
             if (p.YSpeed > 0 && y % 16.0 <= 8.0)
-                Blocks.SOLID_BLOCK.Bellow(p, x, y);
+                BlockList.SOLID_BLOCK.Bellow(p, x, y);
         }
     }
 
