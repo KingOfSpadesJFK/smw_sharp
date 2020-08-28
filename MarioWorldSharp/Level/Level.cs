@@ -9,7 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGame;
 using MarioWorldSharp.Blocks;
-using MarioWorldSharp.Sprite;
+using MarioWorldSharp.Entities;
 using KdTree;
 using KdTree.Math;
 using System.Reflection.Metadata.Ecma335;
@@ -26,7 +26,7 @@ namespace MarioWorldSharp.Levels
         private double _midY;
         private double _xPos;
         private double _yPos;
-        private int _SpriteCount;
+        private int _EntityCount;
         public double X 
         {
             get { return _xPos; }
@@ -45,8 +45,8 @@ namespace MarioWorldSharp.Levels
                 _midY = _yPos + 112.0;
             }
         }
-        public KdTree<double, SpriteData> Sprites { get; set; }
-        public int SpriteCount { get => _SpriteCount; }
+        public KdTree<double, EntityData> Entities { get; set; }
+        public int EntityCount { get => _EntityCount; }
 
         private Level nextLayer;
         private Level prevLayer;
@@ -63,6 +63,7 @@ namespace MarioWorldSharp.Levels
 
         public Level()
         {
+            #region Autogenerate Level
             FormChunks(new Ledge() 
             { 
                 X = 0,
@@ -73,11 +74,10 @@ namespace MarioWorldSharp.Levels
 
             _width = chunks.GetLength(0) * 16;
             _height = chunks.GetLength(1) * 16;
-            Sprites = new KdTree<double, SpriteData>(2, new DoubleMath());
-            _SpriteCount = 0;
+            Entities = new KdTree<double, EntityData>(2, new DoubleMath());
+            _EntityCount = 0;
             X = 0; Y = 0;
 
-            #region Autogenerate Level
             short[,] chunk = chunks[1, 0].GetMap16Array();
             chunk[4, 9] = 0x133;
             chunk[5, 9] = 0x134;
@@ -108,17 +108,22 @@ namespace MarioWorldSharp.Levels
             chunk[11, 9] = 0x130;
 
             Random rand = new Random();
-            for (double i = 0; i < _width * 16; i += 24)
-                AddSprite(i, 60, SpriteID.GreenShellessKoopa);
-            Sprites.Balance();
+            for (double i = 0; i < _width * 16; i += 128)
+                AddEntity(i, 60, EntityID.GreenShellessKoopa);
+            Entities.Balance();
 
             #endregion
         }
 
-        private void AddSprite(double x, double y, SpriteID s, params object[] args)
+        public Level(string levelDataPath)
         {
-            Sprites.Add(new[] { x, y }, new SpriteData { ID = s, Index = SpriteCount, Args = args });
-            _SpriteCount++;
+
+        }
+
+        private void AddEntity(double x, double y, EntityID s, params object[] args)
+        {
+            Entities.Add(new[] { x, y }, new EntityData { ID = s, Index = EntityCount, Args = args });
+            _EntityCount++;
         }
 
         public void Scroll(double playerX, double playerY)
@@ -177,7 +182,15 @@ namespace MarioWorldSharp.Levels
 
             int chunkArrayWidth = (int)Math.Ceiling( (double)(minX + totalWidth) / 16.0 );
             int chunkArrayHeight = (int)Math.Ceiling( (double)(minY + totalHeight) / 16.0 );
-            chunks = new Chunk[chunkArrayWidth, chunkArrayHeight];
+            if (chunks == null)
+                chunks = new Chunk[chunkArrayWidth, chunkArrayHeight];
+            else if (chunks.GetLength(0) < chunkArrayWidth || chunks.GetLength(1) < chunkArrayHeight)
+            {
+                Chunk[,] newChunks = new Chunk[chunkArrayWidth, chunkArrayHeight];
+                chunks.CopyTo(newChunks, 0);
+                chunks = newChunks;
+            }
+
             foreach (ILevelObject o in objects)
             {
                 short[,] build = o.Build();
@@ -235,13 +248,13 @@ namespace MarioWorldSharp.Levels
                     if (chunks[getX / 16, getY / 16] == null)
                         ret[i, j] = 0x25;
                     else
-                        ret[i, j] = chunks[getX / 16, getY / 16].GetMap16Short(getX % 16, getY % 16);
+                        ret[i, j] = chunks[getX / 16, getY / 16].GetMap16(getX % 16, getY % 16);
                 }
             }
             return ret;
         }
 
-        public Block GetMap16(int x, int y)
+        public Block GetBlock(int x, int y)
         {
             if (x >= _width)
                 x = _width - 1;
@@ -256,41 +269,41 @@ namespace MarioWorldSharp.Levels
             if (chunks[x / 16, y / 16] == null)
                 return BlockList.EMPTY_BLOCK;
 
-            return chunks[x / 16, y / 16].GetMap16(x % 16, y % 16);
+            return chunks[x / 16, y / 16].GetBlock(x % 16, y % 16);
         }
 
-        public Block GetMap16FromPosition(double x, double y)
+        public Block GetBlockFromPosition(double x, double y)
         {
-            return GetMap16((int)x / 16, (int)y / 16);
+            return GetBlock((int)x / 16, (int)y / 16);
         }
 
-        public void RemoveSprite(SpriteData s)
+        public void RemoveEntity(EntityData s)
         {
             if (s.Index == -1)
-                throw new UnindexedSpriteException($"{s} was spawned by other means. You cannot remove this sprite from the level.");
+                throw new UnindexedEntityException($"{s} was spawned by other means. You cannot remove this sprite from the level.");
 
-            if (Sprites.TryFindValueReference(s, out double[] point) )
+            if (Entities.TryFindValueReference(s, out double[] point) )
             {
-                Sprites.RemoveSpecific(point, s);
-                _SpriteCount--;
+                Entities.RemoveSpecific(point, s);
+                _EntityCount--;
             }
         }
 
-        public void SpawnSprites()
+        public void SpawnEntities()
         {
-            KdTreeNode<double, SpriteData>[] sprites = Sprites.RadialSearch(new[] { _midX, _midY }, 264.0);
+            KdTreeNode<double, EntityData>[] sprites = Entities.RadialSearch(new[] { _midX, _midY }, 264.0);
 
-            foreach (KdTreeNode<double, SpriteData> n in sprites)
+            foreach (KdTreeNode<double, EntityData> n in sprites)
             {
-                SpriteData d = n.Value;
+                EntityData d = n.Value;
                 if (!d.Spawned)
                 {
-                    SpriteSpawner.SpawnSprite(n.Point, d);
+                    EntitySpawner.SpawnEntity(n.Point, d);
                 }
             }
         }
 
-        public void SpawnSpritesOnScroll()
+        public void SpawnEntitiesOnScroll()
         {
             if (scrollingHorz == 0 && scrollingVert == 0)
                 return;
@@ -322,11 +335,11 @@ namespace MarioWorldSharp.Levels
                     r += 112;
                     break;
             }
-            KdTreeNode<double, SpriteData>[] sprites = Sprites.RadialSearch(new[] { X + x, Y + y }, r);
+            KdTreeNode<double, EntityData>[] sprites = Entities.RadialSearch(new[] { X + x, Y + y }, r);
 
-            foreach (KdTreeNode<double, SpriteData> n in sprites)
+            foreach (KdTreeNode<double, EntityData> n in sprites)
             {
-                SpriteData d = n.Value;
+                EntityData d = n.Value;
                 double x2 = n.Point[0] - X;
                 double y2 = n.Point[1] - Y;
                 if (!d.Spawned)
@@ -336,7 +349,7 @@ namespace MarioWorldSharp.Levels
                         (scrollingVert < 0 && y2 < 0.0) ||
                         (scrollingVert > 0 && y2 > 224.0) )
                     {
-                        SpriteSpawner.SpawnSprite(n.Point, d);
+                        EntitySpawner.SpawnEntity(n.Point, d);
                     }
                 }
             }
@@ -344,7 +357,7 @@ namespace MarioWorldSharp.Levels
 
         internal int GetSpriteCount()
         {
-            return SpriteCount;
+            return EntityCount;
         }
     }
     

@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace MarioWorldSharp
 {
@@ -23,21 +25,19 @@ namespace MarioWorldSharp
         public event EventHandler DEBUG_ResetLevelEvent;
         public void Process()
         {
-            if (Input.Jump.IsKeyPressed())
+            if (Input.Jump.IsKeyPressed() && JumpPressEvent != null)
                 JumpPressEvent.Invoke(this, EventArgs.Empty);
-            if (Input.Spinjump.IsKeyPressed())
+            if (Input.Spinjump.IsKeyPressed() && SpinPressEvent != null)
                 SpinPressEvent.Invoke(this, EventArgs.Empty);
 
-            if (Input.ShowHitboxes.IsKeyPressed())
+            if (Input.ShowHitboxes.IsKeyPressed() && DEBUG_ShowHitboxEvent != null)
                 DEBUG_ShowHitboxEvent.Invoke(this, EventArgs.Empty);
-            if (Input.DEBUG_PrintSpriteTree.IsKeyPressed())
+            if (Input.DEBUG_PrintSpriteTree.IsKeyPressed() && DEBUG_PrintSpriteTreeEvent != null)
                 DEBUG_PrintSpriteTreeEvent.Invoke(this, EventArgs.Empty);
-            if (Input.DEBUG_KillAllSprites.IsKeyPressed())
+            if (Input.DEBUG_KillAllSprites.IsKeyPressed() && DEBUG_KillAllSpritesEvent != null)
                 DEBUG_KillAllSpritesEvent.Invoke(this, EventArgs.Empty);
-            if (Input.DEBUG_ResetLevel.IsKeyPressed())
+            if (Input.DEBUG_ResetLevel.IsKeyPressed() && DEBUG_ResetLevelEvent != null)
                 DEBUG_ResetLevelEvent.Invoke(this, EventArgs.Empty);
-
-
         }
     }
     public class Input

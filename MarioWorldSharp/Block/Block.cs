@@ -9,7 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGame;
 
-using MarioWorldSharp.Sprite;
+using MarioWorldSharp.Entities;
 
 namespace MarioWorldSharp.Blocks
 {
@@ -26,11 +26,11 @@ namespace MarioWorldSharp.Blocks
         public virtual void Cape(double x, double y) {}
         public virtual void Fireball(double x, double y) {}
 
-        public virtual void Above(ISprite s, double x, double y) {}
-        public virtual void Bellow(ISprite s, double x, double y) {}
-        public virtual void Left(ISprite s, double x, double y) {}
-        public virtual void Right(ISprite s, double x, double y) {}
-        public virtual void TopCorner(ISprite s, double x, double y) {}
-        public virtual void BodyInside(ISprite s, double x, double y) {}
+        public virtual void Above(IEntity s, double x, double y) {}
+        public virtual void Bellow(IEntity s, double x, double y) {}
+        public virtual void Left(IEntity s, double x, double y) {}
+        public virtual void Right(IEntity s, double x, double y) {}
+        public virtual void TopCorner(IEntity s, double x, double y) {}
+        public virtual void BodyInside(IEntity s, double x, double y) {}
     }
 }

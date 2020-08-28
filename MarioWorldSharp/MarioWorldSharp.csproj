@@ -11,6 +11,12 @@
     <ApplicationIcon>Icon.ico</ApplicationIcon>
     <Authors>KingOfSpades</Authors>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
   <ItemGroup>
     <None Remove="assets\image\snes\GFX00_Player.bin" />
     <None Remove="assets\image\snes\GFX01_Animation.bin" />

@@ -1,4 +1,4 @@
-﻿using MarioWorldSharp.Sprite;
+﻿using MarioWorldSharp.Entities;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -12,7 +12,7 @@ namespace MarioWorldSharp.Blocks
             if (p.YSpeed > 0 && y % 16.0 <= 8.0)
                 BlockList.SOLID_BLOCK.Bellow(p, x, y);
         }
-        public override void Bellow(ISprite p, double x, double y)
+        public override void Bellow(IEntity p, double x, double y)
         {
             if (p.YSpeed > 0 && y % 16.0 <= 8.0)
                 BlockList.SOLID_BLOCK.Bellow(p, x, y);

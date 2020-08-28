@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MarioWorldSharp.Sprite;
+using MarioWorldSharp.Entities;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGame;
 using MarioWorldSharp.Levels;
 
-namespace MarioWorldSharp.Sprite
+namespace MarioWorldSharp.Entities
 {
     public enum PowerupEnum
     {
@@ -20,7 +20,7 @@ namespace MarioWorldSharp.Sprite
         Fire = 3
     }
 
-    public class Player : ISprite
+    public class Player : IEntity
     {
         private double _xPos;
         private double _yPos;
@@ -58,8 +58,8 @@ namespace MarioWorldSharp.Sprite
         public int Pose { get; set; }
         public int YDrawDisplacement { get; set; }
         public byte DashTimer { get; set; }
-        public SpriteStatus Status { get; set; }
-        public SpriteData Data { get; set; }
+        public EntityStatus Status { get; set; }
+        public EntityData Data { get; set; }
         public bool SpinJumping { get => spinJumped; }
 
         private Rectangle collisionBox;
@@ -170,20 +170,20 @@ namespace MarioWorldSharp.Sprite
             BlockedRight = false;
 
             //Check left collision
-            SMW.Level.GetMap16FromPosition(collisionBox.Left + SideHorizCollisionOffset, collisionBox.Top + TopBotHorizCollisionOffset).Left(this, collisionBox.Left + SideHorizCollisionOffset, collisionBox.Top + TopBotHorizCollisionOffset);
-            SMW.Level.GetMap16FromPosition(collisionBox.Left + SideHorizCollisionOffset, collisionBox.Bottom - TopBotHorizCollisionOffset).Left(this, collisionBox.Left + SideHorizCollisionOffset, collisionBox.Bottom - TopBotHorizCollisionOffset);
+            SMW.Level.GetBlockFromPosition(collisionBox.Left + SideHorizCollisionOffset, collisionBox.Top + TopBotHorizCollisionOffset).Left(this, collisionBox.Left + SideHorizCollisionOffset, collisionBox.Top + TopBotHorizCollisionOffset);
+            SMW.Level.GetBlockFromPosition(collisionBox.Left + SideHorizCollisionOffset, collisionBox.Bottom - TopBotHorizCollisionOffset).Left(this, collisionBox.Left + SideHorizCollisionOffset, collisionBox.Bottom - TopBotHorizCollisionOffset);
 
             //Check right collision
-            SMW.Level.GetMap16FromPosition(collisionBox.Right - SideHorizCollisionOffset, collisionBox.Top + TopBotHorizCollisionOffset).Right(this, collisionBox.Right - SideHorizCollisionOffset, collisionBox.Top + TopBotHorizCollisionOffset);
-            SMW.Level.GetMap16FromPosition(collisionBox.Right - SideHorizCollisionOffset, collisionBox.Bottom - TopBotHorizCollisionOffset).Right(this, collisionBox.Right - SideHorizCollisionOffset, collisionBox.Bottom - TopBotHorizCollisionOffset);
+            SMW.Level.GetBlockFromPosition(collisionBox.Right - SideHorizCollisionOffset, collisionBox.Top + TopBotHorizCollisionOffset).Right(this, collisionBox.Right - SideHorizCollisionOffset, collisionBox.Top + TopBotHorizCollisionOffset);
+            SMW.Level.GetBlockFromPosition(collisionBox.Right - SideHorizCollisionOffset, collisionBox.Bottom - TopBotHorizCollisionOffset).Right(this, collisionBox.Right - SideHorizCollisionOffset, collisionBox.Bottom - TopBotHorizCollisionOffset);
 
             //Check bottom collision
-            SMW.Level.GetMap16FromPosition(collisionBox.Left + SideVertColisionOffset, collisionBox.Bottom).Bellow(this, collisionBox.Left + SideVertColisionOffset, collisionBox.Bottom);
-            SMW.Level.GetMap16FromPosition(collisionBox.Right - SideVertColisionOffset, collisionBox.Bottom).Bellow(this, collisionBox.Right - SideVertColisionOffset, collisionBox.Bottom);
+            SMW.Level.GetBlockFromPosition(collisionBox.Left + SideVertColisionOffset, collisionBox.Bottom).Bellow(this, collisionBox.Left + SideVertColisionOffset, collisionBox.Bottom);
+            SMW.Level.GetBlockFromPosition(collisionBox.Right - SideVertColisionOffset, collisionBox.Bottom).Bellow(this, collisionBox.Right - SideVertColisionOffset, collisionBox.Bottom);
 
             //Check top collision
-            SMW.Level.GetMap16FromPosition(collisionBox.Left + SideVertColisionOffset, collisionBox.Top).Above(this, collisionBox.Left + SideVertColisionOffset, collisionBox.Top);
-            SMW.Level.GetMap16FromPosition(collisionBox.Right - SideVertColisionOffset, collisionBox.Top).Above(this, collisionBox.Right - SideVertColisionOffset, collisionBox.Top);
+            SMW.Level.GetBlockFromPosition(collisionBox.Left + SideVertColisionOffset, collisionBox.Top).Above(this, collisionBox.Left + SideVertColisionOffset, collisionBox.Top);
+            SMW.Level.GetBlockFromPosition(collisionBox.Right - SideVertColisionOffset, collisionBox.Top).Above(this, collisionBox.Right - SideVertColisionOffset, collisionBox.Top);
         }
 
         private void UpdateXPositionition()

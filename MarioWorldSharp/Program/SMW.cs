@@ -9,13 +9,14 @@ using Microsoft.Xna.Framework.Input;
 using MonoGame;
 using System;
 
-using MarioWorldSharp.Sprite;
+using MarioWorldSharp.Entities;
 using KdTree;
 using KdTree.Math;
 using System.Linq;
 using MarioWorldSharp.Levels;
 using System.Runtime.InteropServices;
 using System.Reflection;
+using System.Threading;
 
 namespace MarioWorldSharp
 {
@@ -69,33 +70,25 @@ namespace MarioWorldSharp
 
         private void ResetLevel(object sender, EventArgs e)
         {
-            SpriteHandler.KillSprites(sender, e);
+            FreezeRuntime = true;
+            EntityHandler.KillEntites(sender, e);
+            Texture2D[] backupPoses = Character.Poses;
             Character = new Player();
-            Character.Poses[0] = GraphicsHandler.SmallPlayerGraphics[0];
-            Character.Poses[1] = GraphicsHandler.SmallPlayerGraphics[1];
-            Character.Poses[2] = Character.Poses[1];
-            Character.Poses[3] = GraphicsHandler.SmallPlayerGraphics[2];
-            Character.Poses[4] = GraphicsHandler.SmallPlayerGraphics[3];
-            Character.Poses[5] = GraphicsHandler.SmallPlayerGraphics[4];
-            Character.Poses[6] = Character.Poses[5];
-            Character.Poses[0x0B] = GraphicsHandler.SmallPlayerGraphics[5];
-            Character.Poses[0x0C] = GraphicsHandler.SmallPlayerGraphics[6];
-            Character.Poses[0x0D] = GraphicsHandler.SmallPlayerGraphics[7];
-            Character.Poses[0x0F] = GraphicsHandler.SmallPlayerGraphics[8];
-            Character.Poses[0x24] = GraphicsHandler.SmallPlayerGraphics[9];
-            Character.Poses[0x39] = GraphicsHandler.SmallPlayerGraphics[10];
-            Character.Poses[0x3C] = GraphicsHandler.SmallPlayerGraphics[11];
+            Character.Poses = backupPoses;
             Level = new Level();
-            Level.SpawnSprites();
-            Console.WriteLine(SpriteHandler.GetSpriteTree());
+            Level.SpawnEntities();
+            Console.WriteLine(EntityHandler.GetEntityTree());
+            FreezeRuntime = false;
         }
 
-        private void PrintSpriteTree(object sender, EventArgs e)
+        public static bool FreezeRuntime { get; set; }
+
+        private void PrintEntityTree(object sender, EventArgs e)
         {
-            Console.WriteLine($"Sprite Tree: \n {SpriteHandler.GetSpriteTree()}");
+            Console.WriteLine($"Sprite Tree: \n {EntityHandler.GetEntityTree()}");
 
             Console.WriteLine("Sprite List:");
-            foreach (ISprite s in SpriteHandler.SpriteList)
+            foreach (IEntity s in EntityHandler.EntityList)
                 Console.WriteLine($"    ({s})");
         }
 
@@ -197,19 +190,22 @@ namespace MarioWorldSharp
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            // TODO: Add your update logic here
             InputEvent.Process();
+            // TODO: Add your update logic here
+            //InputEvent.Process();
+            if (FreezeRuntime)
+                goto CountFrame;
             switch (GameMode)
             {
                 case GameMode.TitleScreen:
                     TitleScreen();
                     break;
                 default:
-                    LevelGameMode();
+                    LevelGameMode(gameTime);
                     break;
             }
+        CountFrame:
             base.Update(gameTime);
-
             FrameTimer++;
         }
 
@@ -221,21 +217,25 @@ namespace MarioWorldSharp
         private void InitializeLevelMode(object sender, EventArgs e)
         {
             InputEvent.DEBUG_ShowHitboxEvent += ShowHitbox;
-            InputEvent.DEBUG_PrintSpriteTreeEvent += PrintSpriteTree;
-            InputEvent.DEBUG_KillAllSpritesEvent += SpriteHandler.KillSprites;
+            InputEvent.DEBUG_PrintSpriteTreeEvent += PrintEntityTree;
+            InputEvent.DEBUG_KillAllSpritesEvent += EntityHandler.KillEntites;
             InputEvent.DEBUG_ResetLevelEvent += ResetLevel;
             InputEvent.JumpPressEvent -= InitializeLevelMode;
 
-            GameMode = GameMode.Level;
             Level = new Level();
-            Level.SpawnSprites();
-            Console.WriteLine(SpriteHandler.GetSpriteTree());
+            Level.SpawnEntities();
+            Console.WriteLine(EntityHandler.GetEntityTree());
+            Console.WriteLine($"The main thread is {Thread.CurrentThread.Name}");
+            GameMode = GameMode.Level;
         }
 
-        private void LevelGameMode()
+        public Thread inputThread;
+        public Thread collisionThread;
+
+        private void LevelGameMode(GameTime gameTime)
         {
             Character.Process();
-            SpriteHandler.ProcessSprites();
+            EntityHandler.ProcessEnteties();
             Level.Scroll(Character.XPosition, Character.YPosition);
         }
 
@@ -319,7 +319,7 @@ namespace MarioWorldSharp
                 resChange = false;
             #endregion
 
-            if (!setWindow)
+            if (!setWindow || resChange)
             {
                 if (graphics.IsFullScreen)
                 {
@@ -385,21 +385,22 @@ namespace MarioWorldSharp
             if (GameMode != GameMode.TitleScreen)
             {
                 spriteBatch.Begin();
-                string debug = graphics.PreferredBackBufferWidth + "x" + graphics.PreferredBackBufferHeight + "\nScale: " + scale + ", True Scale: " + trueScale + "\n"
+                string debug = $"{graphics.PreferredBackBufferWidth}x{graphics.PreferredBackBufferHeight}\n"
+                    + $"Scale: {scale}, True Scale: {trueScale}\n"
                     + $"{FPS(gameTime)}FPS \n"
-                    + "Player: (" + Character.XPosition + ", " + Character.YPosition + ")\n"
-                    + "Player (Integral): (" + (int)Character.XPosition + ", " + (int)Character.YPosition + ")\n"
+                    + $"Player: ({ Character.XPosition}, {Character.YPosition})\n"
+                    + $"Player (Integral): ({(int)Character.XPosition}, {(int)Character.YPosition})\n"
                     + $"Camera: ({(int)Level?.X}, {(int)Level?.Y})\n"
-                    + "Player Block Position: (" + (int)(Character.XPosition / 16) + ", " + (int)(Character.YPosition / 16) + ")\n"
-                    + "Player Within Chunk: (" + (int)((Character.XPosition / 16) % 16) + ", " + (int)((Character.YPosition / 16) % 16) + ")\n"
-                    + "Player Chunk: (" + (int)((Character.XPosition / 16) / 16) + ", " + (int)((Character.YPosition / 16) / 16) + ")\n"
-                    + "Speed: (" + Character.XSpeed + "," + Character.YSpeed + ")\n"
-                    + "Speed (SMW Units): (" + (int)(Character.XSpeed * 16.0) + "," + (int)(Character.YSpeed * 16.0) + ")\n"
-                    + $"Called UpdateCollisionTree() {SpriteHandler.UpdateCalls} {(SpriteHandler.UpdateCalls == 1 ? "time" : "times")} this past second\n"
-                    + $"Sprites in level: {Level?.SpriteCount}\n"
-                    + $"Sprites on screen: {SpriteHandler.SpriteCount}\n";
-                debug += SpriteHandler.SpriteLastSpawned != null ? $"Last sprite spawned: ({SpriteHandler.SpriteLastSpawned})\n" : "";
-                debug += SpriteHandler.SpriteLastDepawned != null ? $"Last sprite disposed: ({SpriteHandler.SpriteLastDepawned})\n" : "";
+                    + $"Player Block Position: ({(int)(Character.XPosition / 16)}, {(int)(Character.YPosition / 16)})\n"
+                    + $"Player Within Chunk: ({(int)((Character.XPosition / 16) % 16)}, { (int)((Character.YPosition / 16) % 16)})\n"
+                    + $"Player Chunk: ({(int)((Character.XPosition / 16) / 16)}, {(int)((Character.YPosition / 16) / 16)})\n"
+                    + $"Speed: ({Character.XSpeed + "," + Character.YSpeed})\n"
+                    + $"Speed (SMW Units): ({(int)(Character.XSpeed * 16.0)}, {(int)(Character.YSpeed * 16.0)})\n"
+                    + $"Sprites in level: {Level?.EntityCount}\n"
+                    + $"Sprites on screen: {EntityHandler.EntityCount}\n"
+                    + (EntityHandler.EntityLastSpawned != null ? $"Last sprite spawned: ({EntityHandler.EntityLastSpawned})\n" : "")
+                    + (EntityHandler.EntityLastDepawned != null ? $"Last sprite disposed: ({EntityHandler.EntityLastDepawned})\n" : "");
+                spriteBatch.DrawString(debugFont, debug, Vector2.Zero + new Vector2(2.0f, 2.0f), Color.Black);
                 spriteBatch.DrawString(debugFont, debug, Vector2.Zero, Color.White);
                 spriteBatch.End();
             }
@@ -441,7 +442,6 @@ namespace MarioWorldSharp
             Vector2 size = debugFont.MeasureString(s);
             return new Vector2(200 - size.X / 2, 112 - size.Y / 2);
         }
-
         private void LevelModeDraw()
         {
             //Level Drawing
@@ -460,8 +460,8 @@ namespace MarioWorldSharp
                 layer = layer.GetNextLayer();
             }
 
-            //Draw Sprites
-            foreach (ISprite s in SpriteHandler.SpriteList)
+            //Draw entities
+            foreach (IEntity s in EntityHandler.EntityList.ToArray())
                 s?.Draw(spriteBatch);
 
             //Draw player

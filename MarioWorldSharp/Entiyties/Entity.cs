@@ -10,9 +10,9 @@ using Microsoft.Xna.Framework.Input;
 using MonoGame;
 using MarioWorldSharp.Levels;
 
-namespace MarioWorldSharp.Sprite
+namespace MarioWorldSharp.Entities
 {
-    public enum SpriteStatus
+    public enum EntityStatus
     {
         NonExistent = 0,
         Init = 1,               //Will probably won't be used. Left over from original SMW
@@ -29,7 +29,7 @@ namespace MarioWorldSharp.Sprite
         LevelEndPower = 12
     }
 
-    public interface ISprite
+    public interface IEntity
     {
         public double XPosition { get; set; }
         public double YPosition { get; set; }
@@ -42,8 +42,8 @@ namespace MarioWorldSharp.Sprite
         public bool BlockedAbove { get; set; }
         public bool BlockedLeft { get; set; }
         public bool BlockedRight { get; set; }
-        public SpriteStatus Status { get; set; }
-        public SpriteData Data { get; }
+        public EntityStatus Status { get; set; }
+        public EntityData Data { get; }
         public void Process();
         public void Draw(SpriteBatch spriteBatch);
         public Rectangle GetCollisionBox();
@@ -54,15 +54,15 @@ namespace MarioWorldSharp.Sprite
     /// A class containing the properties of a sprite, but not the sprite itself.
     /// This should be used when generating a sprite.
     /// </summary>
-    public class SpriteData
+    public class EntityData
     {
-        public SpriteID ID;
+        public EntityID ID;
         public object[] Args;
         public bool DisposeOffscreen = true;
-        public int DespawnThresh = 16;
+        public int DespawnThresh = 32;
         public int Index = -1;
         public bool Spawned = false;
-        public bool InteractWithSprites = true;
+        public bool InteractWithEntities = true;
         public bool CollideTurnaround = true;
 
         public override string ToString()
@@ -70,7 +70,7 @@ namespace MarioWorldSharp.Sprite
             return $"{ID.ToString()}, #{Index}";
         }
     }
-    public abstract class Sprite : IDisposable, ISprite
+    public abstract class Entity : IDisposable, IEntity
     {
         private double _xPos;
         private double _yPos;
@@ -112,10 +112,10 @@ namespace MarioWorldSharp.Sprite
         public bool BlockedAbove { get; set; }
         public bool BlockedLeft { get; set; }
         public bool BlockedRight { get; set; }
-        public SpriteStatus Status { get; set; }
-        public SpriteData Data { get; set; }
+        public EntityStatus Status { get; set; }
+        public EntityData Data { get; set; }
 
-        public Sprite(double x, double y, SpriteData d)
+        public Entity(double x, double y, EntityData d)
         {
             this.XPosition = x; this.YPosition = y;
             if (d.DisposeOffscreen)
@@ -126,9 +126,9 @@ namespace MarioWorldSharp.Sprite
             }
             d.Spawned = true;
             this.collisionBox = Rectangle.Empty;
-            this.Status = SpriteStatus.Normal;
+            this.Status = EntityStatus.Normal;
             this.Data = d;
-            SpriteHandler.AddSprites(this);
+            EntityHandler.AddEntity(this);
         }
 
         public abstract void Process();
@@ -141,7 +141,7 @@ namespace MarioWorldSharp.Sprite
         public virtual void Kill()
         {
             if (Data.Index != -1)
-                SMW.Level.RemoveSprite(Data);
+                SMW.Level.RemoveEntity(Data);
             this.Dispose();
         }
 
@@ -175,20 +175,20 @@ namespace MarioWorldSharp.Sprite
             BlockedRight = false;
 
             //Check left collision
-            SMW.Level.GetMap16FromPosition(collisionBox.Left + SideHorizCollisionOffset, collisionBox.Top + TopBotHorizCollisionOffset).Left(this, collisionBox.Left + SideHorizCollisionOffset, collisionBox.Top + TopBotHorizCollisionOffset);
-            SMW.Level.GetMap16FromPosition(collisionBox.Left + SideHorizCollisionOffset, collisionBox.Bottom - TopBotHorizCollisionOffset).Left(this, collisionBox.Left + SideHorizCollisionOffset, collisionBox.Bottom - TopBotHorizCollisionOffset);
+            SMW.Level.GetBlockFromPosition(collisionBox.Left + SideHorizCollisionOffset, collisionBox.Top + TopBotHorizCollisionOffset).Left(this, collisionBox.Left + SideHorizCollisionOffset, collisionBox.Top + TopBotHorizCollisionOffset);
+            SMW.Level.GetBlockFromPosition(collisionBox.Left + SideHorizCollisionOffset, collisionBox.Bottom - TopBotHorizCollisionOffset).Left(this, collisionBox.Left + SideHorizCollisionOffset, collisionBox.Bottom - TopBotHorizCollisionOffset);
 
             //Check right collision
-            SMW.Level.GetMap16FromPosition(collisionBox.Right - SideHorizCollisionOffset, collisionBox.Top + TopBotHorizCollisionOffset).Right(this, collisionBox.Right - SideHorizCollisionOffset, collisionBox.Top + TopBotHorizCollisionOffset);
-            SMW.Level.GetMap16FromPosition(collisionBox.Right - SideHorizCollisionOffset, collisionBox.Bottom - TopBotHorizCollisionOffset).Right(this, collisionBox.Right - SideHorizCollisionOffset, collisionBox.Bottom - TopBotHorizCollisionOffset);
+            SMW.Level.GetBlockFromPosition(collisionBox.Right - SideHorizCollisionOffset, collisionBox.Top + TopBotHorizCollisionOffset).Right(this, collisionBox.Right - SideHorizCollisionOffset, collisionBox.Top + TopBotHorizCollisionOffset);
+            SMW.Level.GetBlockFromPosition(collisionBox.Right - SideHorizCollisionOffset, collisionBox.Bottom - TopBotHorizCollisionOffset).Right(this, collisionBox.Right - SideHorizCollisionOffset, collisionBox.Bottom - TopBotHorizCollisionOffset);
 
             //Check bottom collision
-            SMW.Level.GetMap16FromPosition(collisionBox.Left + SideVertColisionOffset, collisionBox.Bottom).Bellow(this, collisionBox.Left + SideVertColisionOffset, collisionBox.Bottom);
-            SMW.Level.GetMap16FromPosition(collisionBox.Right - SideVertColisionOffset, collisionBox.Bottom).Bellow(this, collisionBox.Right - SideVertColisionOffset, collisionBox.Bottom);
+            SMW.Level.GetBlockFromPosition(collisionBox.Left + SideVertColisionOffset, collisionBox.Bottom).Bellow(this, collisionBox.Left + SideVertColisionOffset, collisionBox.Bottom);
+            SMW.Level.GetBlockFromPosition(collisionBox.Right - SideVertColisionOffset, collisionBox.Bottom).Bellow(this, collisionBox.Right - SideVertColisionOffset, collisionBox.Bottom);
 
             //Check top collision
-            SMW.Level.GetMap16FromPosition(collisionBox.Left + SideVertColisionOffset, collisionBox.Top).Above(this, collisionBox.Left + SideVertColisionOffset, collisionBox.Top);
-            SMW.Level.GetMap16FromPosition(collisionBox.Right - SideVertColisionOffset, collisionBox.Top).Above(this, collisionBox.Right - SideVertColisionOffset, collisionBox.Top);
+            SMW.Level.GetBlockFromPosition(collisionBox.Left + SideVertColisionOffset, collisionBox.Top).Above(this, collisionBox.Left + SideVertColisionOffset, collisionBox.Top);
+            SMW.Level.GetBlockFromPosition(collisionBox.Right - SideVertColisionOffset, collisionBox.Top).Above(this, collisionBox.Right - SideVertColisionOffset, collisionBox.Top);
         }
 
         protected virtual void PlayerCollision()
@@ -231,10 +231,10 @@ namespace MarioWorldSharp.Sprite
         {
         }
 
-        protected bool IsCollidingWithSprites(out ISprite[] nearestNeighbors)
+        protected bool IsCollidingWithSprites(out IEntity[] nearestNeighbors)
         {
-            nearestNeighbors = SpriteHandler.GetNearestNeighbors(new[] { XPosition, YPosition }, 10);
-            foreach(ISprite s in nearestNeighbors)
+            nearestNeighbors = EntityHandler.GetNearestNeighbors(new[] { XPosition, YPosition }, 10);
+            foreach(IEntity s in nearestNeighbors)
             {
                 if (IsCollidingWithSprite(s))
                     return true;
@@ -243,7 +243,7 @@ namespace MarioWorldSharp.Sprite
             return false;
         }
 
-        protected bool IsCollidingWithSprite(ISprite s, out SpriteCollisionSide coll)
+        protected bool IsCollidingWithSprite(IEntity s, out SpriteCollisionSide coll)
         {
             coll = 0;
             //Ignore if s is this sprite
@@ -284,20 +284,22 @@ namespace MarioWorldSharp.Sprite
             Top, Bottom, Left, Right, TopLeft, TopRight, BottomLeft, BottomRight
         }
 
-        protected bool IsCollidingWithSprite(ISprite s)
+        protected bool IsCollidingWithSprite(IEntity s)
         {
             return IsCollidingWithSprite(s, out _);
         }
 
-        protected ISprite[] GetCollidedSprites()
+        protected IEntity[] GetCollidedSprites()
         {
-            ISprite[] sprites = new ISprite[8];
+            IEntity[] sprites = new IEntity[8];
 
-            ISprite[] nearestNeighbors = SpriteHandler.GetNearestNeighbors(new[] { XPosition, YPosition }, 10);
-            foreach (ISprite s in nearestNeighbors)
+            IEntity[] nearestNeighbors = EntityHandler.GetNearestNeighbors(new[] { XPosition, YPosition }, 10);
+            foreach (IEntity s in nearestNeighbors)
             {
                 //Ignore if s is this sprite
                 if (Object.ReferenceEquals(this, s))
+                    continue;
+                if (s == null)
                     continue;
 
                 //Top
@@ -366,9 +368,9 @@ namespace MarioWorldSharp.Sprite
                 if (disposing)
                 {
                     // TODO: dispose managed state (managed objects).
-                    if (this.Status != SpriteStatus.NonExistent)
+                    if (this.Status != EntityStatus.NonExistent)
                     {
-                        this.Status = SpriteStatus.NonExistent;
+                        this.Status = EntityStatus.NonExistent;
                         this.Data.Spawned = false;
                     }
                 }
@@ -403,21 +405,21 @@ namespace MarioWorldSharp.Sprite
         }
 
     }
-    public class TestSprite : Sprite
+    public class TestEntity : Entity
     {
         private Texture2D Box;
         private readonly Random rand = new Random();
         private double speed;
         private bool facingLeft;
 
-        public TestSprite(double x, double y, SpriteData d) : base(x, y, d)
+        public TestEntity(double x, double y, EntityData d) : base(x, y, d)
         {
             if (this.disposedValue)
                 return;
             this.collisionBox = new Rectangle((int)x, (int)y, 16, 16);
             if (this.XPosition % 64 == 0 && d.Index != -1)
             {
-                SpriteSpawner.SpawnSprite(this.XPosition, this.YPosition, new SpriteData { ID = SpriteID.GreenShellessKoopa }).YSpeed = -80.0 / 16.0;
+                EntitySpawner.SpawnEntity(this.XPosition, this.YPosition, new EntityData { ID = EntityID.GreenShellessKoopa }).YSpeed = -80.0 / 16.0;
             }
 
             speed = 2.0 + rand.NextDouble() * 2.0;

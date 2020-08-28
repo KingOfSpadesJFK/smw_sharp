@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGame;
-using MarioWorldSharp.Sprite;
+using MarioWorldSharp.Entities;
 
 namespace MarioWorldSharp.Blocks
 {
@@ -27,7 +27,7 @@ namespace MarioWorldSharp.Blocks
             }
         }
 
-        public override void Above(ISprite s, double x, double y)
+        public override void Above(IEntity s, double x, double y)
         {
             if (s.BlockedAbove)
                 return;
@@ -53,7 +53,7 @@ namespace MarioWorldSharp.Blocks
             }
         }
 
-        public override void Bellow(ISprite s, double x, double y)
+        public override void Bellow(IEntity s, double x, double y)
         {
             if (s.BlockedBellow)
                 return;
@@ -79,7 +79,7 @@ namespace MarioWorldSharp.Blocks
             }
         }
 
-        public override void Left(ISprite s, double x, double y)
+        public override void Left(IEntity s, double x, double y)
         {
             if (s.BlockedLeft)
                 return;
@@ -105,7 +105,7 @@ namespace MarioWorldSharp.Blocks
             }
         }
 
-        public override void Right(ISprite s, double x, double y)
+        public override void Right(IEntity s, double x, double y)
         {
             if (s.BlockedRight)
                 return;

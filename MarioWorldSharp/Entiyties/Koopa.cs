@@ -5,9 +5,9 @@ using System.Collections.Generic;
 using System.Text;
 using MarioWorldSharp.Levels;
 
-namespace MarioWorldSharp.Sprite
+namespace MarioWorldSharp.Entities
 {
-    public class ShellessKoopa : Sprite
+    public class ShellessKoopa : Entity
     {
         private readonly double NORMAL_SPEED = 8.0 / 16.0;
         private readonly double YELLOW_SPEED = 12.0 / 16.0;
@@ -21,7 +21,7 @@ namespace MarioWorldSharp.Sprite
         }
         private Texture2D Box;
 
-        public ShellessKoopa(double x, double y, SpriteData d, int type) : base(x, y, d)
+        public ShellessKoopa(double x, double y, EntityData d, int type) : base(x, y, d)
         {
             if (this.disposedValue)
                 return;
@@ -72,7 +72,7 @@ namespace MarioWorldSharp.Sprite
 
         protected override void SpriteCollision()
         {
-            ISprite[] collidingWith = GetCollidedSprites();
+            IEntity[] collidingWith = GetCollidedSprites();
 
             int[] indecies = new int[]
             { 3,5,7 };

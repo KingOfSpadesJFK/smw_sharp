@@ -1,4 +1,4 @@
-﻿using MarioWorldSharp.Sprite;
+﻿using MarioWorldSharp.Entities;
 using Microsoft.Xna.Framework;
 using System;
 using System.Runtime.InteropServices;
@@ -8,6 +8,7 @@ using System.Reflection;
 using System.IO;
 using Microsoft.VisualBasic.CompilerServices;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace MarioWorldSharp
 {
@@ -25,9 +26,13 @@ namespace MarioWorldSharp
         public static extern int AllocConsole();
 
         private const int STD_OUTPUT_HANDLE = -11;
-        private static bool showConsole = true; //Or false if you don't want to see the console
+        private static bool showConsole = false; //Or false if you don't want to see the console
         private static bool runGame = true;
+        public static bool powerSavingMode = false;
+        public static SMW Instance { get; set; }
         #endregion
+
+        public static Thread MainThread;
 
         /// <summary>
         /// The main entry point for the application.
@@ -36,7 +41,25 @@ namespace MarioWorldSharp
         [STAThread]
         static void Main(string[] args)
         {
-            if (args.Length > 0 && args[0] == "-c")
+            Thread.CurrentThread.Name = "MainThread";
+            MainThread = Thread.CurrentThread;
+            if (args.Length > 0)
+            {
+                foreach (string s in args)
+                {
+                    switch (s)
+                    {
+                        case "-c":
+                            showConsole = true;
+                            break;
+                        case "-p":
+                            powerSavingMode = true;
+                            break;
+                    }
+                }
+            }
+
+            if (showConsole)
             {
                 AllocConsole();
                 IntPtr stdHandle = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -46,7 +69,10 @@ namespace MarioWorldSharp
             if (runGame)
             {
                 using (var game = new SMW())
+                {
+                    Instance = game;
                     game.Run();
+                }
             }
             else
             {

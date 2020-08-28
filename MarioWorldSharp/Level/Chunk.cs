@@ -67,7 +67,7 @@ namespace MarioWorldSharp.Levels
             return map16;
         }
 
-        public Block GetMap16(int x, int y)
+        public Block GetBlock(int x, int y)
         {
             if (map16 == null)
                 return Blocks.BlockList.EMPTY_BLOCK;
@@ -82,7 +82,7 @@ namespace MarioWorldSharp.Levels
             return ret;
         }
 
-        public short GetMap16Short(int x, int y)
+        public short GetMap16(int x, int y)
         {
             if (map16 == null)
                 return 0x25;
