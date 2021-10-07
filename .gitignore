@@ -19,3 +19,4 @@ MarioWorldSharp/assets/snes
 
 #MonoGame
 *.mgcontent
+*.mgstats
