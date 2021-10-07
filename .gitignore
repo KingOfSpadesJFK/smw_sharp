@@ -16,3 +16,6 @@ outerworkspace/snes
 *.bin
 MarioWorldSharp/assets/snes
 */snes/
+
+#MonoGame
+*.mgcontent
